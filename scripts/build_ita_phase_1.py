@@ -34,8 +34,7 @@ QUESTION_RE = re.compile(
 QUESTION_PREFIX_RE = re.compile(r"\bQuest", re.IGNORECASE)
 ALTERNATIVE_RE = re.compile(r"(?<![A-Za-zÀ-ÿ])([A-E])\s*\(\s*\)", re.IGNORECASE)
 STANDALONE_ALTERNATIVE_RE = re.compile(
-    r"(?<![A-Za-zÀ-ÿ0-9])([A-E])(?![A-Za-zÀ-ÿ0-9])",
-    re.IGNORECASE,
+    r"(?<![A-Za-zÀ-ÿ0-9])([A-E])"
 )
 YEAR_RE = re.compile(r"(?<!\d)(20\d{2})(?!\d)")
 QUESTION_NUMBER_TRANSLATION = str.maketrans(
@@ -344,7 +343,7 @@ def split_question_text(raw: str, expected_number: int) -> tuple[str, dict[str, 
         next_start = markers[index + 1].start if index + 1 < len(markers) else len(body)
         value = body[marker.end:next_start].strip()
         if used_fallback:
-            value = re.sub(r"^\s*\(\s*\)\s*", "", value)
+            value = re.sub(r"^\s*(?:\(\s*[O0]?\s*\)|[O0](?=\s))\s*", "", value)
         alternatives[marker.label] = value
 
     if any(not value for value in alternatives.values()):
