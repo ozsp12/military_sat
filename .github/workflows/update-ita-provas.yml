@@ -1,0 +1,66 @@
+name: Update ITA exam archive
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 6 1 * *"
+  push:
+    branches:
+      - main
+    paths:
+      - "scripts/download_ita_provas.py"
+      - "requirements.txt"
+      - ".github/workflows/update-ita-provas.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-ita-exam-archive
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: python -m pip install -r requirements.txt
+
+      - name: Validate downloader
+        run: python -m compileall -q scripts/download_ita_provas.py
+
+      - name: Download official ITA exams
+        run: python scripts/download_ita_provas.py --output ita_provas --refresh --min-files 95
+
+      - name: Validate archive
+        shell: bash
+        run: |
+          set -euo pipefail
+          count="$(find ita_provas -type f -name '*.pdf' | wc -l)"
+          echo "PDF count: ${count}"
+          test "${count}" -ge 95
+          git diff --check
+
+      - name: Commit archive updates
+        shell: bash
+        run: |
+          set -euo pipefail
+          git add ita_provas
+          if git diff --cached --quiet; then
+            echo "ITA archive is already up to date."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Update ITA exam archive"
+          git push
