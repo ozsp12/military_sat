@@ -33,9 +33,7 @@ QUESTION_RE = re.compile(
 )
 QUESTION_PREFIX_RE = re.compile(r"\bQuest", re.IGNORECASE)
 ALTERNATIVE_RE = re.compile(r"(?<![A-Za-zÀ-ÿ])([A-E])\s*\(\s*\)", re.IGNORECASE)
-STANDALONE_ALTERNATIVE_RE = re.compile(
-    r"(?<![A-Za-zÀ-ÿ0-9])([A-E])"
-)
+STANDALONE_ALTERNATIVE_RE = re.compile(r"(?<![A-Za-zÀ-ÿ0-9])([A-E])")
 YEAR_RE = re.compile(r"(?<!\d)(20\d{2})(?!\d)")
 QUESTION_NUMBER_TRANSLATION = str.maketrans(
     {"S": "5", "s": "5", "O": "0", "o": "0", "I": "1", "l": "1"}
@@ -61,6 +59,7 @@ QUESTION_COLUMNS = [
     "alternative_text",
     "has_image",
     "ocr_used",
+    "needs_review",
     "source_pdf",
     "page_start",
     "page_end",
@@ -320,23 +319,33 @@ def locate_alternative_markers(body: str) -> tuple[list[AlternativeMarker], bool
     return fallback, bool(fallback)
 
 
-def split_question_text(raw: str, expected_number: int) -> tuple[str, dict[str, str]]:
+def split_question_text(
+    raw: str,
+    expected_number: int,
+    allow_incomplete: bool = False,
+) -> tuple[str, dict[str, str], bool]:
     header = QUESTION_RE.search(raw)
     if not header or parse_question_number(header.group(1)) != expected_number:
         raise ValueError(f"Question marker {expected_number} not found in extracted text.")
 
     body = raw[header.end():].strip()
     markers, used_fallback = locate_alternative_markers(body)
-    if {marker.label for marker in markers} != set("ABCDE"):
-        diagnostic = re.sub(r"\s+", " ", body[-1800:])
-        raise ValueError(
-            f"Question {expected_number}: expected alternatives A-E; "
-            f"could not locate a complete marker set. OCR tail={diagnostic!r}"
-        )
+    complete = {marker.label for marker in markers} == set("ABCDE")
+
+    if not complete:
+        if not allow_incomplete:
+            diagnostic = re.sub(r"\s+", " ", body[-1800:])
+            raise ValueError(
+                f"Question {expected_number}: expected alternatives A-E; "
+                f"could not locate a complete marker set. OCR tail={diagnostic!r}"
+            )
+        return body, {label: "" for label in "ABCDE"}, True
 
     question_text = body[: markers[0].start].strip()
     if not question_text:
-        raise ValueError(f"Question {expected_number}: empty statement.")
+        if not allow_incomplete:
+            raise ValueError(f"Question {expected_number}: empty statement.")
+        question_text = body
 
     alternatives: dict[str, str] = {}
     for index, marker in enumerate(markers):
@@ -346,11 +355,12 @@ def split_question_text(raw: str, expected_number: int) -> tuple[str, dict[str, 
             value = re.sub(r"^\s*(?:\(\s*[O0]?\s*\)|[O0](?=\s))\s*", "", value)
         alternatives[marker.label] = value
 
-    if any(not value for value in alternatives.values()):
+    incomplete_text = any(not value for value in alternatives.values())
+    if incomplete_text and not allow_incomplete:
         empty = sorted(label for label, value in alternatives.items() if not value)
         raise ValueError(f"Question {expected_number}: empty alternatives {empty}.")
 
-    return question_text, alternatives
+    return question_text, alternatives, used_fallback or incomplete_text
 
 
 def rect_overlap(a: fitz.Rect, b: fitz.Rect) -> float:
@@ -383,6 +393,7 @@ def render_question_images(
     segments: list[PageSegment],
     image_root: Path,
     scale: float,
+    force: bool = False,
 ) -> list[dict[str, object]]:
     rows: list[dict[str, object]] = []
     counter = 0
@@ -390,7 +401,7 @@ def render_question_images(
     for segment in segments:
         page = doc[segment.page_index]
         clip = fitz.Rect(0, segment.y0, page.rect.width, segment.y1)
-        if not segment_has_graphics(page, clip):
+        if not force and not segment_has_graphics(page, clip):
             continue
 
         counter += 1
@@ -460,13 +471,25 @@ def build_exam(
             )
             segments = question_segments(doc, start, end)
             raw = segment_text(all_lines, segments)
-            statement, alternatives = split_question_text(raw, start.number)
+            ocr_used = any(page_ocr[item.page_index] for item in segments)
+            statement, alternatives, parser_review = split_question_text(
+                raw,
+                start.number,
+                allow_incomplete=ocr_used,
+            )
+            needs_review = ocr_used or parser_review
 
             question_id = f"ITA-1F-{year}-Q{start.number:03d}"
-            images = render_question_images(doc, question_id, segments, image_root, scale)
+            images = render_question_images(
+                doc,
+                question_id,
+                segments,
+                image_root,
+                scale,
+                force=needs_review,
+            )
             image_rows.extend(images)
             has_image = bool(images)
-            ocr_used = any(page_ocr[item.page_index] for item in segments)
 
             page_start = min(item.page_index for item in segments) + 1
             page_end = max(item.page_index for item in segments) + 1
@@ -483,6 +506,7 @@ def build_exam(
                         "alternative_text": alternatives[label],
                         "has_image": has_image,
                         "ocr_used": ocr_used,
+                        "needs_review": needs_review,
                         "source_pdf": source_pdf,
                         "page_start": page_start,
                         "page_end": page_end,
@@ -507,8 +531,14 @@ def validate_dataset(questions: pd.DataFrame, images: pd.DataFrame) -> None:
     if not bad.empty:
         raise ValueError(f"Questions without exactly five alternatives: {bad.to_dict()}")
 
-    if questions[["subject", "question_text", "alternative_text"]].isna().any().any():
-        raise ValueError("Null required values detected in question dataset.")
+    required = questions[["subject", "question_text"]].fillna("").astype(str)
+    if required.apply(lambda column: column.str.strip().eq("").any()).any():
+        raise ValueError("Empty required values detected in question dataset.")
+
+    alternative_empty = questions["alternative_text"].fillna("").astype(str).str.strip().eq("")
+    unflagged_empty = questions.loc[alternative_empty & ~questions["needs_review"]]
+    if not unflagged_empty.empty:
+        raise ValueError("Empty alternative text detected without needs_review flag.")
 
     if not images.empty:
         if images["image_id"].duplicated().any():
@@ -520,6 +550,10 @@ def validate_dataset(questions: pd.DataFrame, images: pd.DataFrame) -> None:
         missing_paths = [path for path in images["image_path"] if not Path(path).is_file()]
         if missing_paths:
             raise ValueError(f"Missing rendered images: {missing_paths[:10]}")
+
+    review_without_image = questions.loc[questions["needs_review"] & ~questions["has_image"]]
+    if not review_without_image.empty:
+        raise ValueError("Questions needing review must retain a rendered source image.")
 
     image_questions = set(images["question_id"]) if not images.empty else set()
     flag_questions = set(questions.loc[questions["has_image"], "question_id"])
@@ -580,7 +614,8 @@ def main() -> int:
 
     print(
         f"[done ] {questions['question_id'].nunique()} questions, "
-        f"{len(questions)} alternatives, {len(images)} images"
+        f"{len(questions)} alternatives, {len(images)} images, "
+        f"{questions.loc[questions['needs_review'], 'question_id'].nunique()} question(s) needing review"
     )
     print(f"        {args.dataset}")
     print(f"        {args.image_dataset}")
