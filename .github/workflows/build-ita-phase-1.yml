@@ -38,6 +38,17 @@ jobs:
           python-version: "3.12"
           cache: pip
 
+      - name: Install OCR language data
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y tesseract-ocr tesseract-ocr-por
+          tessdata="$(dirname "$(find /usr/share -name eng.traineddata -print -quit)")"
+          test -n "$tessdata"
+          test -f "$tessdata/por.traineddata"
+          echo "TESSDATA_PREFIX=$tessdata" >> "$GITHUB_ENV"
+
       - name: Install dependencies
         run: python -m pip install -r requirements.txt
 
@@ -66,6 +77,7 @@ jobs:
               "alternative",
               "alternative_text",
               "has_image",
+              "ocr_used",
               "source_pdf",
               "page_start",
               "page_end",
@@ -95,6 +107,7 @@ jobs:
           print(f"Questions: {questions['question_id'].nunique()}")
           print(f"Alternatives: {len(questions)}")
           print(f"Images: {len(images)}")
+          print(f"OCR alternatives: {int(questions['ocr_used'].sum())}")
           PY
 
       - name: Commit generated dataset
