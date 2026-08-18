@@ -23,7 +23,7 @@ ita_provas/
 └── 2008/
 ```
 
-`manifest.xlsx` contains one row per PDF with year, label, repository path, file size, SHA-256 digest, and original source URL. It is generated as a formatted Excel table with filters, frozen header row, alternating row bands, adjusted column widths, and numeric formatting for file size.
+`manifest.xlsx` contains one row per PDF with year, label, repository path, file size, SHA-256 digest, and original source URL.
 
 ### Download
 
@@ -44,30 +44,34 @@ To include answer keys as well:
 python scripts/download_ita_provas.py --include-gabaritos
 ```
 
-## ITA phase 1 dataset
+## ITA datasets
 
-`scripts/build_ita_phase_1.py` converts every `ita_provas/<year>/<year>_fase1.pdf` into a long-format dataset with one row per answer alternative.
+`scripts/build_ita_datasets.py` processes the archived PDFs and separates numbered questions by type rather than by exam phase.
 
 ```text
 data/
-├── ita_phase_1.parquet
-├── ita_phase_1_images.parquet
-└── ita_phase_1_images/
-    ├── 2019/
-    ├── 2020/
-    └── ...
+├── ita_multiple_choice.parquet
+├── ita_multiple_choice.xlsx
+├── ita_multiple_choice_images.parquet
+├── ita_multiple_choice_images/
+├── ita_essay_questions.parquet
+├── ita_essay_questions.xlsx
+├── ita_essay_questions_images.parquet
+└── ita_essay_questions_images/
 ```
 
-`ita_phase_1.parquet` stores the question metadata, statement and alternatives. `ita_phase_1_images.parquet` relates zero or more rendered question images to `question_id`; the PNG files are stored under `data/ita_phase_1_images/<year>/`.
+`ita_multiple_choice.parquet` is long format: one row per answer alternative. `ita_essay_questions.parquet` contains one row per open-ended question. Both preserve `exam_phase`, subject, year, source PDF, page provenance, OCR/review flags, and one-to-many image relationships through separate image Parquets.
+
+For the 2008–2018 single-phase exams, Physics, Mathematics and Chemistry questions 1–20 are classified as multiple choice and 21–30 as essay questions; English and Portuguese numbered questions are multiple choice. From 2019 onward, first-phase questions are multiple choice and second-phase Physics, Mathematics and Chemistry questions are essay questions. Writing prompts are excluded.
 
 Build locally with:
 
 ```bash
-python scripts/build_ita_phase_1.py
+python scripts/build_ita_datasets.py
 ```
 
 ## Automation
 
-`.github/workflows/update-ita-provas.yml` updates the archive automatically on the first day of each month and can also be executed manually. Changes to the downloader or workflow trigger an update after they reach `main`.
+`.github/workflows/update-ita-provas.yml` updates the archive automatically on the first day of each month and can also be executed manually.
 
-`.github/workflows/build-ita-phase-1.yml` validates the dataset builder in pull requests and regenerates the versioned phase-1 dataset after relevant changes reach `main`.
+`.github/workflows/build-ita-datasets.yml` validates the unified builder in pull requests and regenerates the versioned multiple-choice and essay datasets after relevant changes reach `main`.
