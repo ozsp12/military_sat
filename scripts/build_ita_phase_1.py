@@ -23,6 +23,9 @@ DEFAULT_INPUT = Path("ita_provas")
 DEFAULT_DATASET = Path("data/ita_phase_1.parquet")
 DEFAULT_IMAGE_DATASET = Path("data/ita_phase_1_images.parquet")
 DEFAULT_IMAGE_ROOT = Path("data/ita_phase_1_images")
+OCR_LANGUAGE = "por+eng"
+OCR_DPI = 300
+OCR_MIN_CHARS = 80
 
 QUESTION_RE = re.compile(r"\bQuest[^\d\n]{0,12}?(\d{1,3})\s*\.", re.IGNORECASE)
 ALTERNATIVE_RE = re.compile(r"(?<![A-Za-zÀ-ÿ])([A-E])\s*\(\s*\)", re.IGNORECASE)
@@ -47,6 +50,7 @@ QUESTION_COLUMNS = [
     "alternative",
     "alternative_text",
     "has_image",
+    "ocr_used",
     "source_pdf",
     "page_start",
     "page_end",
@@ -106,9 +110,8 @@ def canonical_subject(line: str) -> str | None:
     return SUBJECT_ALIASES.get(normalized)
 
 
-def extract_lines(page: fitz.Page) -> list[TextLine]:
+def payload_to_lines(page: fitz.Page, payload: dict[str, object]) -> list[TextLine]:
     result: list[TextLine] = []
-    payload = page.get_text("dict", sort=True)
     for block in payload.get("blocks", []):
         if block.get("type") != 0:
             continue
@@ -122,17 +125,48 @@ def extract_lines(page: fitz.Page) -> list[TextLine]:
     return sorted(result, key=lambda item: (item.y0, item.x0))
 
 
+def alphanumeric_count(lines: Iterable[TextLine]) -> int:
+    return sum(sum(character.isalnum() for character in line.text) for line in lines)
+
+
+def extract_lines(page: fitz.Page) -> tuple[list[TextLine], bool]:
+    native_payload = page.get_text("dict", sort=True)
+    native_lines = payload_to_lines(page, native_payload)
+    if alphanumeric_count(native_lines) >= OCR_MIN_CHARS:
+        return native_lines, False
+
+    try:
+        textpage = page.get_textpage_ocr(
+            language=OCR_LANGUAGE,
+            dpi=OCR_DPI,
+            full=True,
+        )
+    except Exception as exc:
+        raise RuntimeError(
+            f"Page {page.number + 1} has insufficient embedded text and requires "
+            "OCR. Install Tesseract language data for Portuguese and English."
+        ) from exc
+
+    ocr_payload = page.get_text("dict", textpage=textpage, sort=True)
+    ocr_lines = payload_to_lines(page, ocr_payload)
+    if alphanumeric_count(ocr_lines) <= alphanumeric_count(native_lines):
+        return native_lines, False
+    return ocr_lines, True
+
+
 def discover_questions(
     doc: fitz.Document, year: int
-) -> tuple[list[QuestionStart], list[Boundary], list[list[TextLine]]]:
+) -> tuple[list[QuestionStart], list[Boundary], list[list[TextLine]], list[bool]]:
     all_lines: list[list[TextLine]] = []
+    page_ocr: list[bool] = []
     starts: list[QuestionStart] = []
     subject_boundaries: list[Boundary] = []
     current_subject: str | None = None
 
     for page in doc:
-        lines = extract_lines(page)
+        lines, used_ocr = extract_lines(page)
         all_lines.append(lines)
+        page_ocr.append(used_ocr)
         for line in lines:
             subject = canonical_subject(line.text)
             if subject:
@@ -160,7 +194,7 @@ def discover_questions(
 
     starts.sort(key=lambda item: (item.page_index, item.y0, item.number))
     subject_boundaries.sort(key=lambda item: (item.page_index, item.y0))
-    return starts, subject_boundaries, all_lines
+    return starts, subject_boundaries, all_lines, page_ocr
 
 
 def question_segments(
@@ -324,7 +358,7 @@ def build_exam(
     image_rows: list[dict[str, object]] = []
 
     with fitz.open(pdf) as doc:
-        starts, subject_boundaries, all_lines = discover_questions(doc, year)
+        starts, subject_boundaries, all_lines, page_ocr = discover_questions(doc, year)
         if not starts:
             raise ValueError(f"No questions detected in {pdf}.")
 
@@ -358,6 +392,7 @@ def build_exam(
             images = render_question_images(doc, question_id, segments, image_root, scale)
             image_rows.extend(images)
             has_image = bool(images)
+            ocr_used = any(page_ocr[item.page_index] for item in segments)
 
             page_start = min(item.page_index for item in segments) + 1
             page_end = max(item.page_index for item in segments) + 1
@@ -373,12 +408,14 @@ def build_exam(
                         "alternative": label,
                         "alternative_text": alternatives[label],
                         "has_image": has_image,
+                        "ocr_used": ocr_used,
                         "source_pdf": source_pdf,
                         "page_start": page_start,
                         "page_end": page_end,
                     }
                 )
 
+    print(f"        OCR pages: {sum(page_ocr)}")
     return question_rows, image_rows
 
 
