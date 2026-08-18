@@ -27,9 +27,15 @@ OCR_LANGUAGE = "por+eng"
 OCR_DPI = 300
 OCR_MIN_CHARS = 80
 
-QUESTION_RE = re.compile(r"\bQuest[^\d\n]{0,12}?(\d{1,3})\s*\.", re.IGNORECASE)
+QUESTION_RE = re.compile(
+    r"\bQuest.{0,12}?\s([0-9SOIl]{1,3})\s*\.",
+    re.IGNORECASE,
+)
 ALTERNATIVE_RE = re.compile(r"(?<![A-Za-zÀ-ÿ])([A-E])\s*\(\s*\)", re.IGNORECASE)
 YEAR_RE = re.compile(r"(?<!\d)(20\d{2})(?!\d)")
+QUESTION_NUMBER_TRANSLATION = str.maketrans(
+    {"S": "5", "s": "5", "O": "0", "o": "0", "I": "1", "l": "1"}
+)
 
 SUBJECT_ALIASES = {
     "FISICA": "fisica",
@@ -110,6 +116,13 @@ def canonical_subject(line: str) -> str | None:
     return SUBJECT_ALIASES.get(normalized)
 
 
+def parse_question_number(token: str) -> int:
+    normalized = token.translate(QUESTION_NUMBER_TRANSLATION)
+    if not normalized.isdigit():
+        raise ValueError(f"Invalid question-number token: {token!r}")
+    return int(normalized)
+
+
 def payload_to_lines(page: fitz.Page, payload: dict[str, object]) -> list[TextLine]:
     result: list[TextLine] = []
     for block in payload.get("blocks", []):
@@ -177,15 +190,16 @@ def discover_questions(
             match = QUESTION_RE.search(line.text)
             if not match:
                 continue
+            number = parse_question_number(match.group(1))
             if current_subject is None:
                 raise ValueError(
-                    f"Could not infer subject before question {match.group(1)} "
+                    f"Could not infer subject before question {number} "
                     f"on page {page.number + 1}."
                 )
             starts.append(
                 QuestionStart(
                     year=year,
-                    number=int(match.group(1)),
+                    number=number,
                     subject=current_subject,
                     page_index=page.number,
                     y0=line.y0,
@@ -239,7 +253,7 @@ def segment_text(
 
 def split_question_text(raw: str, expected_number: int) -> tuple[str, dict[str, str]]:
     header = QUESTION_RE.search(raw)
-    if not header or int(header.group(1)) != expected_number:
+    if not header or parse_question_number(header.group(1)) != expected_number:
         raise ValueError(f"Question marker {expected_number} not found in extracted text.")
 
     body = raw[header.end():].strip()
@@ -282,15 +296,12 @@ def rect_overlap(a: fitz.Rect, b: fitz.Rect) -> float:
 
 
 def segment_has_graphics(page: fitz.Page, clip: fitz.Rect) -> bool:
-    # Raster images.
     for image in page.get_images(full=True):
         xref = image[0]
         for rect in page.get_image_rects(xref):
             if rect_overlap(rect, clip) >= 100.0:
                 return True
 
-    # Vector figures. Horizontal/vertical rules are ignored unless several
-    # drawing objects occur inside the question region.
     drawing_hits = 0
     for drawing in page.get_drawings():
         rect = fitz.Rect(drawing["rect"])
