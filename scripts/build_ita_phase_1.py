@@ -228,7 +228,14 @@ def discover_questions(
                 )
             )
 
-    starts.sort(key=lambda item: (item.page_index, item.y0, item.number))
+    ordered_starts = sorted(starts, key=lambda item: (item.page_index, item.y0, item.number))
+    starts = []
+    expected_number = 1
+    for item in ordered_starts:
+        if item.number == expected_number:
+            starts.append(item)
+            expected_number += 1
+
     subject_boundaries.sort(key=lambda item: (item.page_index, item.y0))
     return starts, subject_boundaries, all_lines, page_ocr
 
