@@ -22,7 +22,7 @@ permissions:
 
 concurrency:
   group: build-ita-datasets-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   build:
