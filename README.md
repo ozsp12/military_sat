@@ -12,7 +12,7 @@ The archive contains the exam papers only; answer keys are excluded by default.
 
 ```text
 ita_provas/
-├── manifest.csv
+├── manifest.xlsx
 ├── 2026/
 │   ├── 2026_fase1.pdf
 │   ├── matematica_2026_2f.pdf
@@ -23,7 +23,7 @@ ita_provas/
 └── 2008/
 ```
 
-`manifest.csv` records the year, label, repository path, file size, SHA-256 digest, and original source URL for each PDF.
+`manifest.xlsx` contains one row per PDF with year, label, repository path, file size, SHA-256 digest, and original source URL. It is generated as a formatted Excel table with filters, frozen header row, alternating row bands, adjusted column widths, and numeric formatting for file size.
 
 ### Download
 
