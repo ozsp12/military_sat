@@ -49,6 +49,25 @@ jobs:
           count="$(find ita_provas -type f -name '*.pdf' | wc -l)"
           echo "PDF count: ${count}"
           test "${count}" -ge 95
+          test -s ita_provas/manifest.xlsx
+          test ! -e ita_provas/manifest.csv
+          python - <<'PY'
+          from pathlib import Path
+          from zipfile import ZipFile
+
+          path = Path("ita_provas/manifest.xlsx")
+          required = {
+              "[Content_Types].xml",
+              "xl/workbook.xml",
+              "xl/styles.xml",
+              "xl/worksheets/sheet1.xml",
+              "xl/tables/table1.xml",
+          }
+          with ZipFile(path) as archive:
+              missing = required.difference(archive.namelist())
+          if missing:
+              raise SystemExit(f"Invalid Excel manifest; missing: {sorted(missing)}")
+          PY
           git diff --check
 
       - name: Commit archive updates
