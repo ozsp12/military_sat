@@ -33,6 +33,10 @@ QUESTION_RE = re.compile(
 )
 QUESTION_PREFIX_RE = re.compile(r"\bQuest", re.IGNORECASE)
 ALTERNATIVE_RE = re.compile(r"(?<![A-Za-zÀ-ÿ])([A-E])\s*\(\s*\)", re.IGNORECASE)
+STANDALONE_ALTERNATIVE_RE = re.compile(
+    r"(?<![A-Za-zÀ-ÿ0-9])([A-E])(?![A-Za-zÀ-ÿ0-9])",
+    re.IGNORECASE,
+)
 YEAR_RE = re.compile(r"(?<!\d)(20\d{2})(?!\d)")
 QUESTION_NUMBER_TRANSLATION = str.maketrans(
     {"S": "5", "s": "5", "O": "0", "o": "0", "I": "1", "l": "1"}
@@ -103,6 +107,13 @@ class PageSegment:
 class Boundary:
     page_index: int
     y0: float
+
+
+@dataclass(frozen=True)
+class AlternativeMarker:
+    label: str
+    start: int
+    end: int
 
 
 def normalize_label(value: str) -> str:
@@ -176,8 +187,6 @@ def match_question_header(lines: list[TextLine], index: int) -> re.Match[str] | 
         return match
 
     next_line = lines[index + 1]
-    # Only join nearby lines on the same page. This avoids accidentally attaching
-    # a distant numbered paragraph to a heading that merely contains "Quest".
     if next_line.page_index != line.page_index or next_line.y0 - line.y1 > 25:
         return None
     return QUESTION_RE.search(f"{line.text} {next_line.text}")
@@ -267,37 +276,78 @@ def segment_text(
     return re.sub(r"\s+", " ", " ".join(chunks)).strip()
 
 
+def smallest_complete_alternative_window(body: str) -> list[AlternativeMarker]:
+    """Find the tightest text window containing standalone labels A through E."""
+    candidates = [
+        AlternativeMarker(match.group(1).upper(), match.start(), match.end())
+        for match in STANDALONE_ALTERNATIVE_RE.finditer(body)
+    ]
+    required = set("ABCDE")
+    best: tuple[int, int] | None = None
+    counts: dict[str, int] = {}
+    left = 0
+
+    for right, marker in enumerate(candidates):
+        counts[marker.label] = counts.get(marker.label, 0) + 1
+        while required.issubset(counts):
+            span = candidates[right].end - candidates[left].start
+            if best is None or span < best[0]:
+                best = (span, left)
+                best_right = right
+            left_marker = candidates[left]
+            counts[left_marker.label] -= 1
+            if counts[left_marker.label] == 0:
+                del counts[left_marker.label]
+            left += 1
+
+    if best is None:
+        return []
+
+    window = candidates[best[1] : best_right + 1]
+    selected: dict[str, AlternativeMarker] = {}
+    for marker in window:
+        selected.setdefault(marker.label, marker)
+    if set(selected) != required:
+        return []
+    return sorted(selected.values(), key=lambda item: item.start)
+
+
+def locate_alternative_markers(body: str) -> tuple[list[AlternativeMarker], bool]:
+    primary: dict[str, AlternativeMarker] = {}
+    for match in ALTERNATIVE_RE.finditer(body):
+        label = match.group(1).upper()
+        primary.setdefault(label, AlternativeMarker(label, match.start(), match.end()))
+    if set(primary) == set("ABCDE"):
+        return sorted(primary.values(), key=lambda item: item.start), False
+
+    fallback = smallest_complete_alternative_window(body)
+    return fallback, bool(fallback)
+
+
 def split_question_text(raw: str, expected_number: int) -> tuple[str, dict[str, str]]:
     header = QUESTION_RE.search(raw)
     if not header or parse_question_number(header.group(1)) != expected_number:
         raise ValueError(f"Question marker {expected_number} not found in extracted text.")
 
     body = raw[header.end():].strip()
-    matches = list(ALTERNATIVE_RE.finditer(body))
-    by_label: dict[str, tuple[int, int]] = {}
-    for match in matches:
-        label = match.group(1).upper()
-        by_label.setdefault(label, (match.start(), match.end()))
-
-    expected = {"A", "B", "C", "D", "E"}
-    if set(by_label) != expected:
+    markers, used_fallback = locate_alternative_markers(body)
+    if {marker.label for marker in markers} != set("ABCDE"):
         raise ValueError(
             f"Question {expected_number}: expected alternatives A-E; "
-            f"found {sorted(by_label)}."
+            f"could not locate a complete marker set."
         )
 
-    ordered = sorted(
-        ((label, start, end) for label, (start, end) in by_label.items()),
-        key=lambda item: item[1],
-    )
-    question_text = body[: ordered[0][1]].strip()
+    question_text = body[: markers[0].start].strip()
     if not question_text:
         raise ValueError(f"Question {expected_number}: empty statement.")
 
     alternatives: dict[str, str] = {}
-    for index, (label, _start, end) in enumerate(ordered):
-        next_start = ordered[index + 1][1] if index + 1 < len(ordered) else len(body)
-        alternatives[label] = body[end:next_start].strip()
+    for index, marker in enumerate(markers):
+        next_start = markers[index + 1].start if index + 1 < len(markers) else len(body)
+        value = body[marker.end:next_start].strip()
+        if used_fallback:
+            value = re.sub(r"^\s*\(\s*\)\s*", "", value)
+        alternatives[marker.label] = value
 
     if any(not value for value in alternatives.values()):
         empty = sorted(label for label, value in alternatives.items() if not value)
