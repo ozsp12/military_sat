@@ -1,0 +1,191 @@
+name: Build ITA datasets
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "scripts/build_ita_datasets.py"
+      - "requirements.txt"
+      - "ita_provas/**/*.pdf"
+      - ".github/workflows/build-ita-datasets.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "scripts/build_ita_datasets.py"
+      - "requirements.txt"
+      - "ita_provas/**/*.pdf"
+      - ".github/workflows/build-ita-datasets.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build-ita-datasets-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install OCR language data
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y tesseract-ocr tesseract-ocr-por
+          tessdata="$(dirname "$(find /usr/share -name eng.traineddata -print -quit)")"
+          test -n "$tessdata"
+          test -f "$tessdata/por.traineddata"
+          echo "TESSDATA_PREFIX=$tessdata" >> "$GITHUB_ENV"
+
+      - name: Install dependencies
+        run: python -m pip install -r requirements.txt
+
+      - name: Validate script syntax
+        run: python -m compileall -q scripts/build_ita_datasets.py
+
+      - name: Build ITA datasets
+        run: python scripts/build_ita_datasets.py
+
+      - name: Validate generated datasets
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import zipfile
+          import pandas as pd
+
+          mc = pd.read_parquet("data/ita_multiple_choice.parquet")
+          essay = pd.read_parquet("data/ita_essay_questions.parquet")
+          mc_images = pd.read_parquet("data/ita_multiple_choice_images.parquet")
+          essay_images = pd.read_parquet("data/ita_essay_questions_images.parquet")
+          mcq = mc.drop_duplicates("question_id")
+
+          if len(mcq) != 1616:
+              raise SystemExit(f"Expected 1616 multiple-choice questions, found {len(mcq)}")
+          if len(mc) != 8080:
+              raise SystemExit(f"Expected 8080 alternative rows, found {len(mc)}")
+          if len(essay) != 570:
+              raise SystemExit(f"Expected 570 essay questions, found {len(essay)}")
+
+          if mc["alternative_id"].duplicated().any():
+              raise SystemExit("alternative_id is not unique")
+          if essay["question_id"].duplicated().any():
+              raise SystemExit("essay question_id is not unique")
+          if not (mc.groupby("question_id")["alternative"].nunique() == 5).all():
+              raise SystemExit("At least one multiple-choice question does not have five alternatives")
+
+          for year in range(2008, 2019):
+              legacy_mc = mcq[(mcq.year == year) & (mcq.exam_phase == "single_phase")]
+              legacy_essay = essay[(essay.year == year) & (essay.exam_phase == "single_phase")]
+              expected_mc = {
+                  "fisica": 20,
+                  "ingles": 20,
+                  "matematica": 20,
+                  "portugues": 20,
+                  "quimica": 20,
+              }
+              expected_essay = {"fisica": 10, "matematica": 10, "quimica": 10}
+              mc_counts = legacy_mc.groupby("subject").size().to_dict()
+              essay_counts = legacy_essay.groupby("subject").size().to_dict()
+              if mc_counts != expected_mc:
+                  raise SystemExit(f"{year}: legacy MC counts {mc_counts}")
+              if essay_counts != expected_essay:
+                  raise SystemExit(f"{year}: legacy essay counts {essay_counts}")
+
+          expected_phase1 = {
+              2019: 60,
+              2020: 70,
+              2021: 70,
+              2022: 70,
+              2023: 60,
+              2024: 60,
+              2025: 48,
+              2026: 48,
+          }
+          for year, expected in expected_phase1.items():
+              count = len(mcq[(mcq.year == year) & (mcq.exam_phase == "phase_1")])
+              if count != expected:
+                  raise SystemExit(f"{year}: expected {expected} phase-1 MC questions, found {count}")
+
+              science = essay[
+                  (essay.year == year)
+                  & (essay.exam_phase == "phase_2")
+                  & (essay.subject.isin(["fisica", "matematica", "quimica"]))
+              ]
+              counts = science.groupby("subject").size().to_dict()
+              expected_science = {"fisica": 10, "matematica": 10, "quimica": 10}
+              if counts != expected_science:
+                  raise SystemExit(f"{year}: phase-2 essay counts {counts}")
+
+          for year in (2025, 2026):
+              port_mc = mcq[
+                  (mcq.year == year)
+                  & (mcq.exam_phase == "phase_2")
+                  & (mcq.subject == "portugues")
+              ]
+              port_essay = essay[
+                  (essay.year == year)
+                  & (essay.exam_phase == "phase_2")
+                  & (essay.subject == "portugues")
+              ]
+              if len(port_mc) != 15 or len(port_essay) != 0:
+                  raise SystemExit(
+                      f"{year}: Portuguese expected 15 MC / 0 essay; "
+                      f"found {len(port_mc)} / {len(port_essay)}"
+                  )
+
+          for frame in (mc_images, essay_images):
+              if frame["image_id"].duplicated().any():
+                  raise SystemExit("image_id is not unique")
+              if any(not Path(path).is_file() for path in frame["image_path"]):
+                  raise SystemExit("At least one image_path is missing")
+
+          if (mc["needs_review"] & ~mc["has_image"]).any():
+              raise SystemExit("An MC question needing review has no rendered source image")
+          if (essay["needs_review"] & ~essay["has_image"]).any():
+              raise SystemExit("An essay question needing review has no rendered source image")
+          if mc["source_pdf"].str.contains("redacao", case=False, na=False).any():
+              raise SystemExit("Writing-prompt PDF leaked into multiple-choice dataset")
+          if essay["source_pdf"].str.contains("redacao", case=False, na=False).any():
+              raise SystemExit("Writing-prompt PDF leaked into essay dataset")
+
+          for path in (Path("data/ita_multiple_choice.xlsx"), Path("data/ita_essay_questions.xlsx")):
+              if not path.is_file() or not zipfile.is_zipfile(path):
+                  raise SystemExit(f"Invalid XLSX: {path}")
+
+          print(f"Multiple choice: {len(mcq)} questions / {len(mc)} alternatives")
+          print(f"Essay: {len(essay)} questions")
+          print(f"Images: {len(mc_images)} MC / {len(essay_images)} essay")
+          print(
+              "Needs review: "
+              f"{mc.loc[mc['needs_review'], 'question_id'].nunique()} MC / "
+              f"{int(essay['needs_review'].sum())} essay"
+          )
+          PY
+
+      - name: Commit generated datasets
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git add -A data
+          if git diff --cached --quiet; then
+            echo "ITA datasets are already up to date."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Update ITA datasets"
+          git push
