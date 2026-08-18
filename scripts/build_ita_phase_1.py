@@ -16,7 +16,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable
 
-import fitz  # PyMuPDF
+import pymupdf as fitz
 import pandas as pd
 
 DEFAULT_INPUT = Path("ita_provas")
@@ -26,7 +26,7 @@ DEFAULT_IMAGE_ROOT = Path("data/ita_phase_1_images")
 
 QUESTION_RE = re.compile(r"\bQuest(?:ão|ao)\s+(\d{1,3})\s*\.?", re.IGNORECASE)
 ALTERNATIVE_RE = re.compile(r"(?<![A-Za-zÀ-ÿ])([A-E])\s*\(\s*\)", re.IGNORECASE)
-YEAR_RE = re.compile(r"\b(20\d{2})\b")
+YEAR_RE = re.compile(r"(?<!\d)(20\d{2})(?!\d)")
 
 SUBJECT_ALIASES = {
     "FISICA": "fisica",
