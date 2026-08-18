@@ -53,20 +53,52 @@ jobs:
           test ! -e ita_provas/manifest.csv
           python - <<'PY'
           from pathlib import Path
+          from xml.etree import ElementTree as ET
           from zipfile import ZipFile
 
           path = Path("ita_provas/manifest.xlsx")
           required = {
               "[Content_Types].xml",
+              "_rels/.rels",
               "xl/workbook.xml",
+              "xl/_rels/workbook.xml.rels",
               "xl/styles.xml",
               "xl/worksheets/sheet1.xml",
+              "xl/worksheets/_rels/sheet1.xml.rels",
               "xl/tables/table1.xml",
           }
+
           with ZipFile(path) as archive:
-              missing = required.difference(archive.namelist())
-          if missing:
-              raise SystemExit(f"Invalid Excel manifest; missing: {sorted(missing)}")
+              bad_member = archive.testzip()
+              if bad_member:
+                  raise SystemExit(f"Corrupt XLSX member: {bad_member}")
+
+              names = set(archive.namelist())
+              missing = required.difference(names)
+              if missing:
+                  raise SystemExit(f"Invalid Excel manifest; missing: {sorted(missing)}")
+
+              for name in names:
+                  if name.endswith((".xml", ".rels")):
+                      ET.fromstring(archive.read(name))
+
+              ns = {
+                  "m": "http://schemas.openxmlformats.org/spreadsheetml/2006/main",
+              }
+              table = ET.fromstring(archive.read("xl/tables/table1.xml"))
+              sheet = ET.fromstring(archive.read("xl/worksheets/sheet1.xml"))
+
+              if table.find("m:autoFilter", ns) is None:
+                  raise SystemExit("Manifest table has no AutoFilter")
+              if table.find("m:tableColumns", ns) is None:
+                  raise SystemExit("Manifest table has no tableColumns")
+              if sheet.find("m:tableParts", ns) is None:
+                  raise SystemExit("Worksheet is not linked to the manifest table")
+              if sheet.find("m:autoFilter", ns) is not None:
+                  raise SystemExit(
+                      "Worksheet contains a duplicate top-level AutoFilter; "
+                      "the filter must belong to the Excel table only"
+                  )
           PY
           git diff --check
 
