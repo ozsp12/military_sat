@@ -1,0 +1,113 @@
+name: Build ITA phase 1 dataset
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "scripts/build_ita_phase_1.py"
+      - "requirements.txt"
+      - "ita_provas/**/*_fase1.pdf"
+      - ".github/workflows/build-ita-phase-1.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "scripts/build_ita_phase_1.py"
+      - "requirements.txt"
+      - "ita_provas/**/*_fase1.pdf"
+      - ".github/workflows/build-ita-phase-1.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build-ita-phase-1-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: python -m pip install -r requirements.txt
+
+      - name: Validate builder syntax
+        run: python -m compileall -q scripts/build_ita_phase_1.py
+
+      - name: Build phase 1 dataset
+        run: python scripts/build_ita_phase_1.py
+
+      - name: Validate generated data
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import pandas as pd
+
+          questions = pd.read_parquet("data/ita_phase_1.parquet")
+          images = pd.read_parquet("data/ita_phase_1_images.parquet")
+
+          question_columns = {
+              "alternative_id",
+              "question_id",
+              "year",
+              "question_number",
+              "subject",
+              "question_text",
+              "alternative",
+              "alternative_text",
+              "has_image",
+              "source_pdf",
+              "page_start",
+              "page_end",
+          }
+          image_columns = {
+              "image_id",
+              "question_id",
+              "image_path",
+              "page",
+              "width_px",
+              "height_px",
+          }
+
+          if set(questions.columns) != question_columns:
+              raise SystemExit(f"Unexpected question schema: {list(questions.columns)}")
+          if set(images.columns) != image_columns:
+              raise SystemExit(f"Unexpected image schema: {list(images.columns)}")
+          if questions["alternative_id"].duplicated().any():
+              raise SystemExit("alternative_id is not unique")
+          if not (questions.groupby("question_id")["alternative"].nunique() == 5).all():
+              raise SystemExit("At least one question does not have five alternatives")
+          if images["image_id"].duplicated().any():
+              raise SystemExit("image_id is not unique")
+          if any(not Path(path).is_file() for path in images["image_path"]):
+              raise SystemExit("At least one image_path is missing")
+
+          print(f"Questions: {questions['question_id'].nunique()}")
+          print(f"Alternatives: {len(questions)}")
+          print(f"Images: {len(images)}")
+          PY
+
+      - name: Commit generated dataset
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git add data/ita_phase_1.parquet data/ita_phase_1_images.parquet data/ita_phase_1_images
+          if git diff --cached --quiet; then
+            echo "ITA phase 1 dataset is already up to date."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Update ITA phase 1 dataset"
+          git push
