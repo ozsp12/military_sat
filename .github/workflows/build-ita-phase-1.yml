@@ -78,6 +78,7 @@ jobs:
               "alternative_text",
               "has_image",
               "ocr_used",
+              "needs_review",
               "source_pdf",
               "page_start",
               "page_end",
@@ -103,11 +104,17 @@ jobs:
               raise SystemExit("image_id is not unique")
           if any(not Path(path).is_file() for path in images["image_path"]):
               raise SystemExit("At least one image_path is missing")
+          if (questions["needs_review"] & ~questions["has_image"]).any():
+              raise SystemExit("A question needing review has no rendered source image")
 
           print(f"Questions: {questions['question_id'].nunique()}")
           print(f"Alternatives: {len(questions)}")
           print(f"Images: {len(images)}")
           print(f"OCR alternatives: {int(questions['ocr_used'].sum())}")
+          print(
+              "Questions needing review: "
+              f"{questions.loc[questions['needs_review'], 'question_id'].nunique()}"
+          )
           PY
 
       - name: Commit generated dataset
