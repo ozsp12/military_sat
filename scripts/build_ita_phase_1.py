@@ -475,7 +475,7 @@ def build_exam(
             statement, alternatives, parser_review = split_question_text(
                 raw,
                 start.number,
-                allow_incomplete=ocr_used,
+                allow_incomplete=True,
             )
             needs_review = ocr_used or parser_review
 
