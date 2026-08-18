@@ -38,6 +38,17 @@ jobs:
           python-version: "3.12"
           cache: pip
 
+      - name: Install OCR language data
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y tesseract-ocr tesseract-ocr-por
+          tessdata="$(dirname "$(find /usr/share -name eng.traineddata -print -quit)")"
+          test -n "$tessdata"
+          test -f "$tessdata/por.traineddata"
+          echo "TESSDATA_PREFIX=$tessdata" >> "$GITHUB_ENV"
+
       - name: Install dependencies
         run: python -m pip install -r requirements.txt
 
@@ -66,6 +77,8 @@ jobs:
               "alternative",
               "alternative_text",
               "has_image",
+              "ocr_used",
+              "needs_review",
               "source_pdf",
               "page_start",
               "page_end",
@@ -91,10 +104,17 @@ jobs:
               raise SystemExit("image_id is not unique")
           if any(not Path(path).is_file() for path in images["image_path"]):
               raise SystemExit("At least one image_path is missing")
+          if (questions["needs_review"] & ~questions["has_image"]).any():
+              raise SystemExit("A question needing review has no rendered source image")
 
           print(f"Questions: {questions['question_id'].nunique()}")
           print(f"Alternatives: {len(questions)}")
           print(f"Images: {len(images)}")
+          print(f"OCR alternatives: {int(questions['ocr_used'].sum())}")
+          print(
+              "Questions needing review: "
+              f"{questions.loc[questions['needs_review'], 'question_id'].nunique()}"
+          )
           PY
 
       - name: Commit generated dataset

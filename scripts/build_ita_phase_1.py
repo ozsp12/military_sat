@@ -23,10 +23,21 @@ DEFAULT_INPUT = Path("ita_provas")
 DEFAULT_DATASET = Path("data/ita_phase_1.parquet")
 DEFAULT_IMAGE_DATASET = Path("data/ita_phase_1_images.parquet")
 DEFAULT_IMAGE_ROOT = Path("data/ita_phase_1_images")
+OCR_LANGUAGE = "por+eng"
+OCR_DPI = 300
+OCR_MIN_CHARS = 80
 
-QUESTION_RE = re.compile(r"\bQuest(?:ão|ao|[^\w\d]?ao)\s+(\d{1,3})\s*\.?", re.IGNORECASE)
+QUESTION_RE = re.compile(
+    r"\bQuest.{0,12}?\s([0-9SOIl]{1,3})\s*\.",
+    re.IGNORECASE,
+)
+QUESTION_PREFIX_RE = re.compile(r"\bQuest", re.IGNORECASE)
 ALTERNATIVE_RE = re.compile(r"(?<![A-Za-zÀ-ÿ])([A-E])\s*\(\s*\)", re.IGNORECASE)
+STANDALONE_ALTERNATIVE_RE = re.compile(r"(?<![A-Za-zÀ-ÿ0-9])([A-E])")
 YEAR_RE = re.compile(r"(?<!\d)(20\d{2})(?!\d)")
+QUESTION_NUMBER_TRANSLATION = str.maketrans(
+    {"S": "5", "s": "5", "O": "0", "o": "0", "I": "1", "l": "1"}
+)
 
 SUBJECT_ALIASES = {
     "FISICA": "fisica",
@@ -47,6 +58,8 @@ QUESTION_COLUMNS = [
     "alternative",
     "alternative_text",
     "has_image",
+    "ocr_used",
+    "needs_review",
     "source_pdf",
     "page_start",
     "page_end",
@@ -94,6 +107,13 @@ class Boundary:
     y0: float
 
 
+@dataclass(frozen=True)
+class AlternativeMarker:
+    label: str
+    start: int
+    end: int
+
+
 def normalize_label(value: str) -> str:
     value = unicodedata.normalize("NFKD", value)
     value = "".join(ch for ch in value if not unicodedata.combining(ch))
@@ -106,9 +126,15 @@ def canonical_subject(line: str) -> str | None:
     return SUBJECT_ALIASES.get(normalized)
 
 
-def extract_lines(page: fitz.Page) -> list[TextLine]:
+def parse_question_number(token: str) -> int:
+    normalized = token.translate(QUESTION_NUMBER_TRANSLATION)
+    if not normalized.isdigit():
+        raise ValueError(f"Invalid question-number token: {token!r}")
+    return int(normalized)
+
+
+def payload_to_lines(page: fitz.Page, payload: dict[str, object]) -> list[TextLine]:
     result: list[TextLine] = []
-    payload = page.get_text("dict", sort=True)
     for block in payload.get("blocks", []):
         if block.get("type") != 0:
             continue
@@ -122,45 +148,96 @@ def extract_lines(page: fitz.Page) -> list[TextLine]:
     return sorted(result, key=lambda item: (item.y0, item.x0))
 
 
+def alphanumeric_count(lines: Iterable[TextLine]) -> int:
+    return sum(sum(character.isalnum() for character in line.text) for line in lines)
+
+
+def extract_lines(page: fitz.Page) -> tuple[list[TextLine], bool]:
+    native_payload = page.get_text("dict", sort=True)
+    native_lines = payload_to_lines(page, native_payload)
+    if alphanumeric_count(native_lines) >= OCR_MIN_CHARS:
+        return native_lines, False
+
+    try:
+        textpage = page.get_textpage_ocr(
+            language=OCR_LANGUAGE,
+            dpi=OCR_DPI,
+            full=True,
+        )
+    except Exception as exc:
+        raise RuntimeError(
+            f"Page {page.number + 1} has insufficient embedded text and requires "
+            "OCR. Install Tesseract language data for Portuguese and English."
+        ) from exc
+
+    ocr_payload = page.get_text("dict", textpage=textpage, sort=True)
+    ocr_lines = payload_to_lines(page, ocr_payload)
+    if alphanumeric_count(ocr_lines) <= alphanumeric_count(native_lines):
+        return native_lines, False
+    return ocr_lines, True
+
+
+def match_question_header(lines: list[TextLine], index: int) -> re.Match[str] | None:
+    line = lines[index]
+    match = QUESTION_RE.search(line.text)
+    if match or not QUESTION_PREFIX_RE.search(line.text) or index + 1 >= len(lines):
+        return match
+
+    next_line = lines[index + 1]
+    if next_line.page_index != line.page_index or next_line.y0 - line.y1 > 25:
+        return None
+    return QUESTION_RE.search(f"{line.text} {next_line.text}")
+
+
 def discover_questions(
     doc: fitz.Document, year: int
-) -> tuple[list[QuestionStart], list[Boundary], list[list[TextLine]]]:
+) -> tuple[list[QuestionStart], list[Boundary], list[list[TextLine]], list[bool]]:
     all_lines: list[list[TextLine]] = []
+    page_ocr: list[bool] = []
     starts: list[QuestionStart] = []
     subject_boundaries: list[Boundary] = []
     current_subject: str | None = None
 
     for page in doc:
-        lines = extract_lines(page)
+        lines, used_ocr = extract_lines(page)
         all_lines.append(lines)
-        for line in lines:
+        page_ocr.append(used_ocr)
+        for index, line in enumerate(lines):
             subject = canonical_subject(line.text)
             if subject:
                 current_subject = subject
                 subject_boundaries.append(Boundary(page.number, line.y0))
                 continue
 
-            match = QUESTION_RE.search(line.text)
+            match = match_question_header(lines, index)
             if not match:
                 continue
+            number = parse_question_number(match.group(1))
             if current_subject is None:
                 raise ValueError(
-                    f"Could not infer subject before question {match.group(1)} "
+                    f"Could not infer subject before question {number} "
                     f"on page {page.number + 1}."
                 )
             starts.append(
                 QuestionStart(
                     year=year,
-                    number=int(match.group(1)),
+                    number=number,
                     subject=current_subject,
                     page_index=page.number,
                     y0=line.y0,
                 )
             )
 
-    starts.sort(key=lambda item: (item.page_index, item.y0, item.number))
+    ordered_starts = sorted(starts, key=lambda item: (item.page_index, item.y0, item.number))
+    starts = []
+    expected_number = 1
+    for item in ordered_starts:
+        if item.number == expected_number:
+            starts.append(item)
+            expected_number += 1
+
     subject_boundaries.sort(key=lambda item: (item.page_index, item.y0))
-    return starts, subject_boundaries, all_lines
+    return starts, subject_boundaries, all_lines, page_ocr
 
 
 def question_segments(
@@ -203,43 +280,94 @@ def segment_text(
     return re.sub(r"\s+", " ", " ".join(chunks)).strip()
 
 
-def split_question_text(raw: str, expected_number: int) -> tuple[str, dict[str, str]]:
+def smallest_complete_alternative_window(body: str) -> list[AlternativeMarker]:
+    candidates = [
+        AlternativeMarker(match.group(1).upper(), match.start(), match.end())
+        for match in STANDALONE_ALTERNATIVE_RE.finditer(body)
+    ]
+    required = set("ABCDE")
+    best: tuple[int, int, int] | None = None
+    counts: dict[str, int] = {}
+    left = 0
+
+    for right, marker in enumerate(candidates):
+        counts[marker.label] = counts.get(marker.label, 0) + 1
+        while required.issubset(counts):
+            span = candidates[right].end - candidates[left].start
+            if best is None or span < best[0]:
+                best = (span, left, right)
+            left_marker = candidates[left]
+            counts[left_marker.label] -= 1
+            if counts[left_marker.label] == 0:
+                del counts[left_marker.label]
+            left += 1
+
+    if best is None:
+        return []
+
+    window = candidates[best[1] : best[2] + 1]
+    selected: dict[str, AlternativeMarker] = {}
+    for marker in window:
+        selected.setdefault(marker.label, marker)
+    if set(selected) != required:
+        return []
+    return sorted(selected.values(), key=lambda item: item.start)
+
+
+def locate_alternative_markers(body: str) -> tuple[list[AlternativeMarker], bool]:
+    primary: dict[str, AlternativeMarker] = {}
+    for match in ALTERNATIVE_RE.finditer(body):
+        label = match.group(1).upper()
+        primary.setdefault(label, AlternativeMarker(label, match.start(), match.end()))
+    if set(primary) == set("ABCDE"):
+        return sorted(primary.values(), key=lambda item: item.start), False
+
+    fallback = smallest_complete_alternative_window(body)
+    return fallback, bool(fallback)
+
+
+def split_question_text(
+    raw: str,
+    expected_number: int,
+    allow_incomplete: bool = False,
+) -> tuple[str, dict[str, str], bool]:
     header = QUESTION_RE.search(raw)
-    if not header or int(header.group(1)) != expected_number:
+    if not header or parse_question_number(header.group(1)) != expected_number:
         raise ValueError(f"Question marker {expected_number} not found in extracted text.")
 
     body = raw[header.end():].strip()
-    matches = list(ALTERNATIVE_RE.finditer(body))
-    by_label: dict[str, tuple[int, int]] = {}
-    for match in matches:
-        label = match.group(1).upper()
-        by_label.setdefault(label, (match.start(), match.end()))
+    markers, used_fallback = locate_alternative_markers(body)
+    complete = {marker.label for marker in markers} == set("ABCDE")
 
-    expected = {"A", "B", "C", "D", "E"}
-    if set(by_label) != expected:
-        raise ValueError(
-            f"Question {expected_number}: expected alternatives A-E; "
-            f"found {sorted(by_label)}."
-        )
+    if not complete:
+        if not allow_incomplete:
+            diagnostic = re.sub(r"\s+", " ", body[-1800:])
+            raise ValueError(
+                f"Question {expected_number}: expected alternatives A-E; "
+                f"could not locate a complete marker set. OCR tail={diagnostic!r}"
+            )
+        return body, {label: "" for label in "ABCDE"}, True
 
-    ordered = sorted(
-        ((label, start, end) for label, (start, end) in by_label.items()),
-        key=lambda item: item[1],
-    )
-    question_text = body[: ordered[0][1]].strip()
+    question_text = body[: markers[0].start].strip()
     if not question_text:
-        raise ValueError(f"Question {expected_number}: empty statement.")
+        if not allow_incomplete:
+            raise ValueError(f"Question {expected_number}: empty statement.")
+        question_text = body
 
     alternatives: dict[str, str] = {}
-    for index, (label, _start, end) in enumerate(ordered):
-        next_start = ordered[index + 1][1] if index + 1 < len(ordered) else len(body)
-        alternatives[label] = body[end:next_start].strip()
+    for index, marker in enumerate(markers):
+        next_start = markers[index + 1].start if index + 1 < len(markers) else len(body)
+        value = body[marker.end:next_start].strip()
+        if used_fallback:
+            value = re.sub(r"^\s*(?:\(\s*[O0]?\s*\)|[O0](?=\s))\s*", "", value)
+        alternatives[marker.label] = value
 
-    if any(not value for value in alternatives.values()):
+    incomplete_text = any(not value for value in alternatives.values())
+    if incomplete_text and not allow_incomplete:
         empty = sorted(label for label, value in alternatives.items() if not value)
         raise ValueError(f"Question {expected_number}: empty alternatives {empty}.")
 
-    return question_text, alternatives
+    return question_text, alternatives, used_fallback or incomplete_text
 
 
 def rect_overlap(a: fitz.Rect, b: fitz.Rect) -> float:
@@ -248,15 +376,12 @@ def rect_overlap(a: fitz.Rect, b: fitz.Rect) -> float:
 
 
 def segment_has_graphics(page: fitz.Page, clip: fitz.Rect) -> bool:
-    # Raster images.
     for image in page.get_images(full=True):
         xref = image[0]
         for rect in page.get_image_rects(xref):
             if rect_overlap(rect, clip) >= 100.0:
                 return True
 
-    # Vector figures. Horizontal/vertical rules are ignored unless several
-    # drawing objects occur inside the question region.
     drawing_hits = 0
     for drawing in page.get_drawings():
         rect = fitz.Rect(drawing["rect"])
@@ -275,6 +400,7 @@ def render_question_images(
     segments: list[PageSegment],
     image_root: Path,
     scale: float,
+    force: bool = False,
 ) -> list[dict[str, object]]:
     rows: list[dict[str, object]] = []
     counter = 0
@@ -282,7 +408,7 @@ def render_question_images(
     for segment in segments:
         page = doc[segment.page_index]
         clip = fitz.Rect(0, segment.y0, page.rect.width, segment.y1)
-        if not segment_has_graphics(page, clip):
+        if not force and not segment_has_graphics(page, clip):
             continue
 
         counter += 1
@@ -324,7 +450,7 @@ def build_exam(
     image_rows: list[dict[str, object]] = []
 
     with fitz.open(pdf) as doc:
-        starts, subject_boundaries, all_lines = discover_questions(doc, year)
+        starts, subject_boundaries, all_lines, page_ocr = discover_questions(doc, year)
         if not starts:
             raise ValueError(f"No questions detected in {pdf}.")
 
@@ -352,10 +478,23 @@ def build_exam(
             )
             segments = question_segments(doc, start, end)
             raw = segment_text(all_lines, segments)
-            statement, alternatives = split_question_text(raw, start.number)
+            ocr_used = any(page_ocr[item.page_index] for item in segments)
+            statement, alternatives, parser_review = split_question_text(
+                raw,
+                start.number,
+                allow_incomplete=True,
+            )
+            needs_review = ocr_used or parser_review
 
             question_id = f"ITA-1F-{year}-Q{start.number:03d}"
-            images = render_question_images(doc, question_id, segments, image_root, scale)
+            images = render_question_images(
+                doc,
+                question_id,
+                segments,
+                image_root,
+                scale,
+                force=needs_review,
+            )
             image_rows.extend(images)
             has_image = bool(images)
 
@@ -373,12 +512,15 @@ def build_exam(
                         "alternative": label,
                         "alternative_text": alternatives[label],
                         "has_image": has_image,
+                        "ocr_used": ocr_used,
+                        "needs_review": needs_review,
                         "source_pdf": source_pdf,
                         "page_start": page_start,
                         "page_end": page_end,
                     }
                 )
 
+    print(f"        OCR pages: {sum(page_ocr)}")
     return question_rows, image_rows
 
 
@@ -396,8 +538,14 @@ def validate_dataset(questions: pd.DataFrame, images: pd.DataFrame) -> None:
     if not bad.empty:
         raise ValueError(f"Questions without exactly five alternatives: {bad.to_dict()}")
 
-    if questions[["subject", "question_text", "alternative_text"]].isna().any().any():
-        raise ValueError("Null required values detected in question dataset.")
+    required = questions[["subject", "question_text"]].fillna("").astype(str)
+    if required.apply(lambda column: column.str.strip().eq("").any()).any():
+        raise ValueError("Empty required values detected in question dataset.")
+
+    alternative_empty = questions["alternative_text"].fillna("").astype(str).str.strip().eq("")
+    unflagged_empty = questions.loc[alternative_empty & ~questions["needs_review"]]
+    if not unflagged_empty.empty:
+        raise ValueError("Empty alternative text detected without needs_review flag.")
 
     if not images.empty:
         if images["image_id"].duplicated().any():
@@ -409,6 +557,10 @@ def validate_dataset(questions: pd.DataFrame, images: pd.DataFrame) -> None:
         missing_paths = [path for path in images["image_path"] if not Path(path).is_file()]
         if missing_paths:
             raise ValueError(f"Missing rendered images: {missing_paths[:10]}")
+
+    review_without_image = questions.loc[questions["needs_review"] & ~questions["has_image"]]
+    if not review_without_image.empty:
+        raise ValueError("Questions needing review must retain a rendered source image.")
 
     image_questions = set(images["question_id"]) if not images.empty else set()
     flag_questions = set(questions.loc[questions["has_image"], "question_id"])
@@ -469,7 +621,8 @@ def main() -> int:
 
     print(
         f"[done ] {questions['question_id'].nunique()} questions, "
-        f"{len(questions)} alternatives, {len(images)} images"
+        f"{len(questions)} alternatives, {len(images)} images, "
+        f"{questions.loc[questions['needs_review'], 'question_id'].nunique()} question(s) needing review"
     )
     print(f"        {args.dataset}")
     print(f"        {args.image_dataset}")
