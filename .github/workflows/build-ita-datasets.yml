@@ -70,12 +70,14 @@ jobs:
           essay = pd.read_parquet("data/ita_essay_questions.parquet")
           mc_images = pd.read_parquet("data/ita_multiple_choice_images.parquet")
           essay_images = pd.read_parquet("data/ita_essay_questions_images.parquet")
+          mcq = mc.drop_duplicates("question_id")
 
-          mc_questions = mc["question_id"].nunique()
-          if mc_questions < 1200:
-              raise SystemExit(f"Too few multiple-choice questions: {mc_questions}")
-          if len(essay) < 400:
-              raise SystemExit(f"Too few essay questions: {len(essay)}")
+          if len(mcq) != 1616:
+              raise SystemExit(f"Expected 1616 multiple-choice questions, found {len(mcq)}")
+          if len(mc) != 8080:
+              raise SystemExit(f"Expected 8080 alternative rows, found {len(mc)}")
+          if len(essay) != 570:
+              raise SystemExit(f"Expected 570 essay questions, found {len(essay)}")
 
           if mc["alternative_id"].duplicated().any():
               raise SystemExit("alternative_id is not unique")
@@ -84,21 +86,65 @@ jobs:
           if not (mc.groupby("question_id")["alternative"].nunique() == 5).all():
               raise SystemExit("At least one multiple-choice question does not have five alternatives")
 
-          legacy_years = set(range(2008, 2019))
-          mc_years = set(mc["year"].unique())
-          essay_years = set(essay["year"].unique())
-          if not legacy_years.issubset(mc_years):
-              raise SystemExit(f"Missing legacy MC years: {sorted(legacy_years - mc_years)}")
-          if not legacy_years.issubset(essay_years):
-              raise SystemExit(f"Missing legacy essay years: {sorted(legacy_years - essay_years)}")
+          for year in range(2008, 2019):
+              legacy_mc = mcq[(mcq.year == year) & (mcq.exam_phase == "single_phase")]
+              legacy_essay = essay[(essay.year == year) & (essay.exam_phase == "single_phase")]
+              expected_mc = {
+                  "fisica": 20,
+                  "ingles": 20,
+                  "matematica": 20,
+                  "portugues": 20,
+                  "quimica": 20,
+              }
+              expected_essay = {"fisica": 10, "matematica": 10, "quimica": 10}
+              mc_counts = legacy_mc.groupby("subject").size().to_dict()
+              essay_counts = legacy_essay.groupby("subject").size().to_dict()
+              if mc_counts != expected_mc:
+                  raise SystemExit(f"{year}: legacy MC counts {mc_counts}")
+              if essay_counts != expected_essay:
+                  raise SystemExit(f"{year}: legacy essay counts {essay_counts}")
 
-          modern_years = set(range(2019, 2027))
-          phase1_years = set(mc.loc[mc["exam_phase"] == "phase_1", "year"].unique())
-          phase2_essay_years = set(essay.loc[essay["exam_phase"] == "phase_2", "year"].unique())
-          if not modern_years.issubset(phase1_years):
-              raise SystemExit(f"Missing modern phase-1 years: {sorted(modern_years - phase1_years)}")
-          if not modern_years.issubset(phase2_essay_years):
-              raise SystemExit(f"Missing modern phase-2 essay years: {sorted(modern_years - phase2_essay_years)}")
+          expected_phase1 = {
+              2019: 60,
+              2020: 70,
+              2021: 70,
+              2022: 70,
+              2023: 60,
+              2024: 60,
+              2025: 48,
+              2026: 48,
+          }
+          for year, expected in expected_phase1.items():
+              count = len(mcq[(mcq.year == year) & (mcq.exam_phase == "phase_1")])
+              if count != expected:
+                  raise SystemExit(f"{year}: expected {expected} phase-1 MC questions, found {count}")
+
+              science = essay[
+                  (essay.year == year)
+                  & (essay.exam_phase == "phase_2")
+                  & (essay.subject.isin(["fisica", "matematica", "quimica"]))
+              ]
+              counts = science.groupby("subject").size().to_dict()
+              expected_science = {"fisica": 10, "matematica": 10, "quimica": 10}
+              if counts != expected_science:
+                  raise SystemExit(f"{year}: phase-2 essay counts {counts}")
+
+          for year in (2025, 2026):
+              port_mc = mcq[
+                  (mcq.year == year)
+                  & (mcq.exam_phase == "phase_2")
+                  & (mcq.subject == "portugues")
+              ]
+              port_essay = essay[
+                  (essay.year == year)
+                  & (essay.exam_phase == "phase_2")
+                  & (essay.subject == "portugues")
+              ]
+              if len(port_mc) != 15 or len(port_essay) != 0:
+                  raise SystemExit(
+                      f"{year}: Portuguese expected 15 MC / 0 essay; "
+                      f"found {len(port_mc)} / {len(port_essay)}"
+                  )
 
           for frame in (mc_images, essay_images):
               if frame["image_id"].duplicated().any():
@@ -106,6 +152,10 @@ jobs:
               if any(not Path(path).is_file() for path in frame["image_path"]):
                   raise SystemExit("At least one image_path is missing")
 
+          if (mc["needs_review"] & ~mc["has_image"]).any():
+              raise SystemExit("An MC question needing review has no rendered source image")
+          if (essay["needs_review"] & ~essay["has_image"]).any():
+              raise SystemExit("An essay question needing review has no rendered source image")
           if mc["source_pdf"].str.contains("redacao", case=False, na=False).any():
               raise SystemExit("Writing-prompt PDF leaked into multiple-choice dataset")
           if essay["source_pdf"].str.contains("redacao", case=False, na=False).any():
@@ -115,7 +165,7 @@ jobs:
               if not path.is_file() or not zipfile.is_zipfile(path):
                   raise SystemExit(f"Invalid XLSX: {path}")
 
-          print(f"Multiple choice: {mc_questions} questions / {len(mc)} alternatives")
+          print(f"Multiple choice: {len(mcq)} questions / {len(mc)} alternatives")
           print(f"Essay: {len(essay)} questions")
           print(f"Images: {len(mc_images)} MC / {len(essay_images)} essay")
           print(
