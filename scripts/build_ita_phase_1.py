@@ -24,7 +24,7 @@ DEFAULT_DATASET = Path("data/ita_phase_1.parquet")
 DEFAULT_IMAGE_DATASET = Path("data/ita_phase_1_images.parquet")
 DEFAULT_IMAGE_ROOT = Path("data/ita_phase_1_images")
 
-QUESTION_RE = re.compile(r"\bQuest(?:ão|ao|[^\w\d]?ao)\s+(\d{1,3})\s*\.?", re.IGNORECASE)
+QUESTION_RE = re.compile(r"\bQuest[^\d\n]{0,12}?(\d{1,3})\s*\.", re.IGNORECASE)
 ALTERNATIVE_RE = re.compile(r"(?<![A-Za-zÀ-ÿ])([A-E])\s*\(\s*\)", re.IGNORECASE)
 YEAR_RE = re.compile(r"(?<!\d)(20\d{2})(?!\d)")
 
