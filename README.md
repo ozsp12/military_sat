@@ -44,6 +44,30 @@ To include answer keys as well:
 python scripts/download_ita_provas.py --include-gabaritos
 ```
 
+## ITA phase 1 dataset
+
+`scripts/build_ita_phase_1.py` converts every `ita_provas/<year>/<year>_fase1.pdf` into a long-format dataset with one row per answer alternative.
+
+```text
+data/
+├── ita_phase_1.parquet
+├── ita_phase_1_images.parquet
+└── ita_phase_1_images/
+    ├── 2019/
+    ├── 2020/
+    └── ...
+```
+
+`ita_phase_1.parquet` stores the question metadata, statement and alternatives. `ita_phase_1_images.parquet` relates zero or more rendered question images to `question_id`; the PNG files are stored under `data/ita_phase_1_images/<year>/`.
+
+Build locally with:
+
+```bash
+python scripts/build_ita_phase_1.py
+```
+
 ## Automation
 
 `.github/workflows/update-ita-provas.yml` updates the archive automatically on the first day of each month and can also be executed manually. Changes to the downloader or workflow trigger an update after they reach `main`.
+
+`.github/workflows/build-ita-phase-1.yml` validates the dataset builder in pull requests and regenerates the versioned phase-1 dataset after relevant changes reach `main`.
