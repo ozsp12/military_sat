@@ -5,6 +5,7 @@ on:
   pull_request:
     paths:
       - "scripts/build_ita_phase_1.py"
+      - "scripts/export_ita_phase_1_excel.py"
       - "requirements.txt"
       - "ita_provas/**/*_fase1.pdf"
       - ".github/workflows/build-ita-phase-1.yml"
@@ -13,6 +14,7 @@ on:
       - main
     paths:
       - "scripts/build_ita_phase_1.py"
+      - "scripts/export_ita_phase_1_excel.py"
       - "requirements.txt"
       - "ita_provas/**/*_fase1.pdf"
       - ".github/workflows/build-ita-phase-1.yml"
@@ -52,20 +54,29 @@ jobs:
       - name: Install dependencies
         run: python -m pip install -r requirements.txt
 
-      - name: Validate builder syntax
-        run: python -m compileall -q scripts/build_ita_phase_1.py
+      - name: Validate script syntax
+        run: |
+          python -m compileall -q \
+            scripts/build_ita_phase_1.py \
+            scripts/export_ita_phase_1_excel.py
 
       - name: Build phase 1 dataset
         run: python scripts/build_ita_phase_1.py
+
+      - name: Build Excel inspection workbook
+        run: python scripts/export_ita_phase_1_excel.py
 
       - name: Validate generated data
         run: |
           python - <<'PY'
           from pathlib import Path
+          import xml.etree.ElementTree as ET
+          import zipfile
           import pandas as pd
 
           questions = pd.read_parquet("data/ita_phase_1.parquet")
           images = pd.read_parquet("data/ita_phase_1_images.parquet")
+          excel_path = Path("data/ita_phase_1.xlsx")
 
           question_columns = {
               "alternative_id",
@@ -107,6 +118,28 @@ jobs:
           if (questions["needs_review"] & ~questions["has_image"]).any():
               raise SystemExit("A question needing review has no rendered source image")
 
+          if not excel_path.is_file() or not zipfile.is_zipfile(excel_path):
+              raise SystemExit("ita_phase_1.xlsx is missing or is not a valid XLSX archive")
+
+          with zipfile.ZipFile(excel_path) as archive:
+              required_members = {
+                  "xl/workbook.xml",
+                  "xl/worksheets/sheet1.xml",
+                  "xl/worksheets/sheet2.xml",
+              }
+              missing = required_members - set(archive.namelist())
+              if missing:
+                  raise SystemExit(f"XLSX is missing required members: {sorted(missing)}")
+
+              workbook_xml = ET.fromstring(archive.read("xl/workbook.xml"))
+              namespace = "{http://schemas.openxmlformats.org/spreadsheetml/2006/main}"
+              sheet_names = [
+                  sheet.attrib["name"]
+                  for sheet in workbook_xml.iter(f"{namespace}sheet")
+              ]
+              if sheet_names != ["questions", "images"]:
+                  raise SystemExit(f"Unexpected XLSX sheets: {sheet_names}")
+
           print(f"Questions: {questions['question_id'].nunique()}")
           print(f"Alternatives: {len(questions)}")
           print(f"Images: {len(images)}")
@@ -115,6 +148,7 @@ jobs:
               "Questions needing review: "
               f"{questions.loc[questions['needs_review'], 'question_id'].nunique()}"
           )
+          print(f"Excel sheets: {sheet_names}")
           PY
 
       - name: Commit generated dataset
@@ -122,7 +156,11 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          git add data/ita_phase_1.parquet data/ita_phase_1_images.parquet data/ita_phase_1_images
+          git add \
+            data/ita_phase_1.parquet \
+            data/ita_phase_1_images.parquet \
+            data/ita_phase_1.xlsx \
+            data/ita_phase_1_images
           if git diff --cached --quiet; then
             echo "ITA phase 1 dataset is already up to date."
             exit 0
