@@ -31,6 +31,7 @@ QUESTION_RE = re.compile(
     r"\bQuest.{0,12}?\s([0-9SOIl]{1,3})\s*\.",
     re.IGNORECASE,
 )
+QUESTION_PREFIX_RE = re.compile(r"\bQuest", re.IGNORECASE)
 ALTERNATIVE_RE = re.compile(r"(?<![A-Za-zÀ-ÿ])([A-E])\s*\(\s*\)", re.IGNORECASE)
 YEAR_RE = re.compile(r"(?<!\d)(20\d{2})(?!\d)")
 QUESTION_NUMBER_TRANSLATION = str.maketrans(
@@ -167,6 +168,21 @@ def extract_lines(page: fitz.Page) -> tuple[list[TextLine], bool]:
     return ocr_lines, True
 
 
+def match_question_header(lines: list[TextLine], index: int) -> re.Match[str] | None:
+    """Match a question header, allowing OCR to split `Questão` from its number."""
+    line = lines[index]
+    match = QUESTION_RE.search(line.text)
+    if match or not QUESTION_PREFIX_RE.search(line.text) or index + 1 >= len(lines):
+        return match
+
+    next_line = lines[index + 1]
+    # Only join nearby lines on the same page. This avoids accidentally attaching
+    # a distant numbered paragraph to a heading that merely contains "Quest".
+    if next_line.page_index != line.page_index or next_line.y0 - line.y1 > 25:
+        return None
+    return QUESTION_RE.search(f"{line.text} {next_line.text}")
+
+
 def discover_questions(
     doc: fitz.Document, year: int
 ) -> tuple[list[QuestionStart], list[Boundary], list[list[TextLine]], list[bool]]:
@@ -180,14 +196,14 @@ def discover_questions(
         lines, used_ocr = extract_lines(page)
         all_lines.append(lines)
         page_ocr.append(used_ocr)
-        for line in lines:
+        for index, line in enumerate(lines):
             subject = canonical_subject(line.text)
             if subject:
                 current_subject = subject
                 subject_boundaries.append(Boundary(page.number, line.y0))
                 continue
 
-            match = QUESTION_RE.search(line.text)
+            match = match_question_header(lines, index)
             if not match:
                 continue
             number = parse_question_number(match.group(1))
