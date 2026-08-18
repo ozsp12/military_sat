@@ -311,21 +311,33 @@ def match_question_header(lines: list[TextLine], index: int) -> re.Match[str] | 
     return QUESTION_RE.search(f"{line.text} {nxt.text}")
 
 
-def bare_question_candidates(
-    all_lines: list[list[TextLine]], year: int, subject: str | None
+def recover_bare_question_one(
+    candidates: list[QuestionStart],
+    all_lines: list[list[TextLine]],
+    year: int,
+    subject: str | None,
 ) -> list[QuestionStart]:
     if subject is None:
-        return []
-    result: list[QuestionStart] = []
+        return candidates
+    ordered = sorted(candidates, key=lambda q: (q.page_index, q.y0, q.number))
+    if not ordered or ordered[0].number != 2:
+        return candidates
+
+    first = ordered[0]
+    possible: list[QuestionStart] = []
     for page_index, lines in enumerate(all_lines):
+        if page_index > first.page_index:
+            break
         for line in lines:
+            if page_index == first.page_index and line.y0 >= first.y0:
+                break
             match = BARE_QUESTION_RE.match(line.text)
-            if not match:
-                continue
-            number = int(match.group(1))
-            if 1 <= number <= 40:
-                result.append(QuestionStart(year, number, subject, page_index, line.y0))
-    return result
+            if match and int(match.group(1)) == 1:
+                possible.append(QuestionStart(year, 1, subject, page_index, line.y0))
+
+    if possible:
+        candidates = [*candidates, possible[-1]]
+    return candidates
 
 
 def choose_sequence(candidates: list[QuestionStart], expected_count: int | None) -> list[QuestionStart]:
@@ -333,8 +345,6 @@ def choose_sequence(candidates: list[QuestionStart], expected_count: int | None)
     if not ordered:
         return []
 
-    # Prefer a sequence beginning at 1. Legacy Portuguese is numbered 21--40,
-    # so if no question 1 exists the first physical marker is the seed.
     seed_index = next((i for i, q in enumerate(ordered) if q.number == 1), 0)
     seed = ordered[seed_index]
     result = [seed]
@@ -383,10 +393,9 @@ def discover_from_lines(
                 )
             )
 
-    # Bare numeric headers are only considered for single-subject PDFs. They are
-    # useful for occasional layout anomalies but cannot displace a normal marker:
-    # physical order + strict sequential selection still determines acceptance.
-    candidates.extend(bare_question_candidates(all_lines, year, fixed_subject))
+    candidates = recover_bare_question_one(
+        candidates, all_lines, year, fixed_subject
+    )
     starts = choose_sequence(candidates, expected_count)
     stop_boundaries.sort(key=lambda b: (b.page_index, b.y0))
     return starts, stop_boundaries
