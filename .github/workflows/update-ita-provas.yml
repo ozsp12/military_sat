@@ -3,7 +3,7 @@ name: Update ITA exam archive
 on:
   workflow_dispatch:
   schedule:
-    - cron: "17 6 1 * *"
+    - cron: "23 6 1 * *"
   push:
     branches:
       - main
