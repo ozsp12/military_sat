@@ -340,6 +340,59 @@ def recover_bare_question_one(
     return candidates
 
 
+def position_between(
+    page_index: int,
+    y0: float,
+    left: QuestionStart,
+    right: QuestionStart,
+) -> bool:
+    point = (page_index, y0)
+    return (left.page_index, left.y0) < point < (right.page_index, right.y0)
+
+
+def recover_single_number_gaps(
+    candidates: list[QuestionStart],
+    all_lines: list[list[TextLine]],
+    year: int,
+    subject: str | None,
+) -> list[QuestionStart]:
+    """Bridge only an isolated n -> n+2 gap with a bare n+1 header.
+
+    This is intentionally narrower than accepting all bare numbered lines. It
+    handles legacy layout anomalies such as Mathematics 2017 while preventing
+    numbered text inside Portuguese passages from becoming false questions.
+    """
+    if subject is None:
+        return candidates
+
+    ordered = sorted(candidates, key=lambda q: (q.page_index, q.y0, q.number))
+    additions: list[QuestionStart] = []
+    existing_positions = {(q.page_index, q.y0, q.number) for q in ordered}
+
+    for left, right in zip(ordered, ordered[1:]):
+        if left.subject != right.subject or right.number != left.number + 2:
+            continue
+        missing = left.number + 1
+        possible: list[QuestionStart] = []
+        for page_index in range(left.page_index, right.page_index + 1):
+            for line in all_lines[page_index]:
+                if not position_between(page_index, line.y0, left, right):
+                    continue
+                match = BARE_QUESTION_RE.match(line.text)
+                if match and int(match.group(1)) == missing:
+                    possible.append(
+                        QuestionStart(year, missing, subject, page_index, line.y0)
+                    )
+        if len(possible) == 1:
+            candidate = possible[0]
+            key = (candidate.page_index, candidate.y0, candidate.number)
+            if key not in existing_positions:
+                additions.append(candidate)
+                existing_positions.add(key)
+
+    return [*candidates, *additions]
+
+
 def choose_sequence(candidates: list[QuestionStart], expected_count: int | None) -> list[QuestionStart]:
     ordered = sorted(candidates, key=lambda q: (q.page_index, q.y0, q.number))
     if not ordered:
@@ -394,6 +447,9 @@ def discover_from_lines(
             )
 
     candidates = recover_bare_question_one(
+        candidates, all_lines, year, fixed_subject
+    )
+    candidates = recover_single_number_gaps(
         candidates, all_lines, year, fixed_subject
     )
     starts = choose_sequence(candidates, expected_count)
