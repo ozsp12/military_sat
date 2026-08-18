@@ -180,7 +180,6 @@ def extract_lines(page: fitz.Page) -> tuple[list[TextLine], bool]:
 
 
 def match_question_header(lines: list[TextLine], index: int) -> re.Match[str] | None:
-    """Match a question header, allowing OCR to split `Questão` from its number."""
     line = lines[index]
     match = QUESTION_RE.search(line.text)
     if match or not QUESTION_PREFIX_RE.search(line.text) or index + 1 >= len(lines):
@@ -277,13 +276,12 @@ def segment_text(
 
 
 def smallest_complete_alternative_window(body: str) -> list[AlternativeMarker]:
-    """Find the tightest text window containing standalone labels A through E."""
     candidates = [
         AlternativeMarker(match.group(1).upper(), match.start(), match.end())
         for match in STANDALONE_ALTERNATIVE_RE.finditer(body)
     ]
     required = set("ABCDE")
-    best: tuple[int, int] | None = None
+    best: tuple[int, int, int] | None = None
     counts: dict[str, int] = {}
     left = 0
 
@@ -292,8 +290,7 @@ def smallest_complete_alternative_window(body: str) -> list[AlternativeMarker]:
         while required.issubset(counts):
             span = candidates[right].end - candidates[left].start
             if best is None or span < best[0]:
-                best = (span, left)
-                best_right = right
+                best = (span, left, right)
             left_marker = candidates[left]
             counts[left_marker.label] -= 1
             if counts[left_marker.label] == 0:
@@ -303,7 +300,7 @@ def smallest_complete_alternative_window(body: str) -> list[AlternativeMarker]:
     if best is None:
         return []
 
-    window = candidates[best[1] : best_right + 1]
+    window = candidates[best[1] : best[2] + 1]
     selected: dict[str, AlternativeMarker] = {}
     for marker in window:
         selected.setdefault(marker.label, marker)
@@ -332,9 +329,10 @@ def split_question_text(raw: str, expected_number: int) -> tuple[str, dict[str, 
     body = raw[header.end():].strip()
     markers, used_fallback = locate_alternative_markers(body)
     if {marker.label for marker in markers} != set("ABCDE"):
+        diagnostic = re.sub(r"\s+", " ", body[-1800:])
         raise ValueError(
             f"Question {expected_number}: expected alternatives A-E; "
-            f"could not locate a complete marker set."
+            f"could not locate a complete marker set. OCR tail={diagnostic!r}"
         )
 
     question_text = body[: markers[0].start].strip()
