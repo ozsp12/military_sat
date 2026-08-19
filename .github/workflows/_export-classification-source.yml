@@ -1,12 +1,10 @@
-name: Export compact ITA classification source
+name: Build classified ITA workbook
 
 on:
   pull_request:
     branches:
       - main
     paths-ignore:
-      - data/_classification_compact/**
-      - data/_classification_mapping/**
       - data/ita_multiple_choice_classified.xlsx
   workflow_dispatch:
 
@@ -14,7 +12,7 @@ permissions:
   contents: write
 
 jobs:
-  export:
+  build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -23,45 +21,166 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - run: python -m pip install pandas pyarrow
-      - name: Build compact classification views
+      - run: python -m pip install pandas pyarrow XlsxWriter
+      - name: Validate taxonomy and build workbook
         run: |
           python - <<'PY'
-          import pandas as pd
           from pathlib import Path
+          import zipfile
+          import pandas as pd
+
+          taxonomy = {
+            'fisica': {
+              'mecanica': {'geral','cinematica','dinamica','equilibrio_e_estatica','trabalho_e_energia','impulso_e_momento','colisoes','rotacao','gravitacao','movimento_circular'},
+              'fluidos': {'geral','hidrostatica','hidrodinamica'},
+              'termodinamica': {'geral','calorimetria','dilatacao','gases','leis_da_termodinamica','maquinas_termicas','mudancas_de_fase'},
+              'ondas': {'geral','movimento_harmonico_simples','ondas_mecanicas','acustica','efeito_doppler'},
+              'optica': {'geral','optica_geometrica','reflexao','refracao','lentes_e_espelhos','interferencia','difracao','polarizacao'},
+              'eletrostatica': {'geral','carga_campo_potencial','capacitores'},
+              'circuitos_eletricos': {'geral','corrente_e_resistencia','circuitos_cc','circuitos_ca','potencia_eletrica'},
+              'eletromagnetismo': {'geral','campo_magnetico','forca_magnetica','inducao_eletromagnetica','torque_magnetico','ondas_eletromagneticas'},
+              'fisica_moderna': {'geral','relatividade','quantica','efeito_fotoeletrico','fisica_atomica','fisica_nuclear','fisica_de_particulas'},
+              'eletronica': {'geral','semicondutores','transistores','amplificadores'},
+            },
+            'matematica': {
+              'algebra': {'geral','equacoes_e_inequacoes','expressoes_algebricas','valor_absoluto'},
+              'funcoes': {'geral','funcoes_reais','composicao_e_inversa','graficos','equacoes_funcionais'},
+              'geometria_plana': {'geral','triangulos','circulos','poligonos','areas','geometria_euclidiana'},
+              'geometria_espacial': {'geral','solidos','areas_e_volumes','posicoes_relativas'},
+              'geometria_analitica': {'geral','retas','circunferencia','conicas','vetores'},
+              'trigonometria': {'geral','identidades_trigonometricas','equacoes_trigonometricas'},
+              'combinatoria': {'geral','principios_de_contagem','binomio_de_newton'},
+              'probabilidade': {'geral','probabilidade_discreta','probabilidade_condicional'},
+              'sequencias_e_progressoes': {'geral','sequencias','progressao_aritmetica','progressao_geometrica','recorrencias'},
+              'numeros_complexos': {'geral','forma_algebrica','forma_polar','raizes_complexas'},
+              'polinomios': {'geral','raizes_de_polinomios','coeficientes','divisibilidade_de_polinomios'},
+              'matrizes_e_sistemas': {'geral','matrizes','determinantes','sistemas_lineares'},
+              'logaritmos_e_exponenciais': {'geral','logaritmos','exponenciais'},
+              'conjuntos': {'geral','operacoes_com_conjuntos','relacoes'},
+              'teoria_dos_numeros': {'geral','divisibilidade','congruencias','numeros_inteiros'},
+            },
+            'quimica': {
+              'estrutura_atomica': {'geral','modelos_atomicos','numeros_quanticos','espectros_atomicos'},
+              'propriedades_periodicas': {'geral','tabela_periodica','tendencias_periodicas'},
+              'ligacoes_e_estrutura_molecular': {'geral','ligacoes_quimicas','geometria_molecular','forcas_intermoleculares'},
+              'estequiometria': {'geral','mol_e_massas','formulas_quimicas','balanceamento','reagente_limitante'},
+              'solucoes': {'geral','concentracao','solubilidade','propriedades_coligativas'},
+              'gases': {'geral','equacao_de_estado','misturas_gasosas'},
+              'termoquimica': {'geral','entalpia','lei_de_hess','energia_de_ligacao'},
+              'cinetica_quimica': {'geral','velocidade_de_reacao','energia_de_ativacao','catalise'},
+              'equilibrio_quimico': {'geral','constante_de_equilibrio','principio_de_le_chatelier','equilibrio_de_solubilidade'},
+              'acidos_e_bases': {'geral','ph_e_poh','tampoes','hidrolise','titulacao'},
+              'eletroquimica': {'geral','pilhas','eletrolise','potenciais_eletroquimicos'},
+              'quimica_inorganica': {'geral','funcoes_inorganicas','reacoes_inorganicas','quimica_de_coordenacao'},
+              'quimica_organica': {'geral','funcoes_organicas','reacoes_organicas','isomeria','polimeros'},
+              'quimica_nuclear': {'geral','radioatividade','reacoes_nucleares'},
+            },
+            'portugues': {
+              'interpretacao_textual': {'geral','compreensao','inferencia','coesao_e_coerencia'},
+              'gramatica': {'geral','morfologia','sintaxe','concordancia','regencia','pontuacao','ortografia'},
+              'semantica': {'geral','significacao','ambiguidade','relacoes_semanticas'},
+              'literatura': {'geral','escolas_literarias','analise_literaria','autores_e_obras'},
+              'figuras_de_linguagem': {'geral','figuras_semanticas','figuras_sintaticas'},
+              'variacao_linguistica': {'geral','registro','variedades_linguisticas'},
+              'generos_textuais': {'geral','tipologia_textual','generos_discursivos'},
+            },
+            'ingles': {
+              'reading_comprehension': {'geral','main_idea','detail','inference'},
+              'vocabulary': {'geral','meaning_in_context','synonyms_and_antonyms'},
+              'grammar': {'geral','verb_tenses','modals','conditionals','articles_and_determiners','prepositions','syntax'},
+              'reference_and_cohesion': {'geral','pronoun_reference','connectors','cohesive_devices'},
+              'inference': {'geral','implicit_meaning','author_intent'},
+              'text_structure': {'geral','organization','rhetorical_function'},
+            }
+          }
+          allowed_skills = {
+            'interpretacao_de_texto','interpretacao_de_graficos','interpretacao_de_tabelas','interpretacao_de_figuras',
+            'modelagem_matematica','modelagem_fisica','raciocinio_algebrico','raciocinio_geometrico','calculo_numerico',
+            'analise_dimensional','argumentacao_logica','leitura_em_ingles','analise_linguistica','aplicacao_de_formulas','resolucao_de_problemas'
+          }
 
           df = pd.read_parquet('data/ita_multiple_choice.parquet')
-          base = df[['question_id','year','exam_phase','subject','question_number','question_text','needs_review','has_image']].drop_duplicates('question_id').copy()
-          alts = (df.sort_values(['question_id','alternative'])
-                    .groupby('question_id')
-                    .apply(lambda g: ' || '.join(f"{a}:{t}" for a, t in zip(g['alternative'], g['alternative_text'])), include_groups=False)
-                    .rename('alternatives'))
-          q = base.merge(alts, on='question_id', how='left')
+          images = pd.read_parquet('data/ita_multiple_choice_images.parquet')
+          source = df[['question_id','subject']].drop_duplicates('question_id')
+          maps = [pd.read_csv(p, sep='\t') for p in sorted(Path('data/_classification_mapping').glob('*.tsv'))]
+          mapping = pd.concat(maps, ignore_index=True)
 
-          def compact_text(text):
-              text = ' '.join(str(text).split())
-              if len(text) <= 240:
-                  return text
-              return text[:160] + ' [...] ' + text[-72:]
+          errors = []
+          if len(mapping) != 1616:
+            errors.append(f'classification rows={len(mapping)}, expected 1616')
+          if mapping.question_id.duplicated().any():
+            errors.append('duplicate question_id: ' + ', '.join(mapping.loc[mapping.question_id.duplicated(), 'question_id'].head(20)))
+          missing = sorted(set(source.question_id) - set(mapping.question_id))
+          extra = sorted(set(mapping.question_id) - set(source.question_id))
+          if missing: errors.append('missing: ' + ', '.join(missing[:30]))
+          if extra: errors.append('extra: ' + ', '.join(extra[:30]))
 
-          def compact_alt(text):
-              text = ' '.join(str(text).split())
-              return text[:96]
+          m = mapping.merge(source, on='question_id', how='left', validate='one_to_one')
+          for row in m.itertuples(index=False):
+            subj = row.subject
+            if subj not in taxonomy:
+              errors.append(f'{row.question_id}: unknown subject {subj}')
+              continue
+            if row.topic not in taxonomy[subj]:
+              errors.append(f'{row.question_id}: invalid topic {subj}/{row.topic}')
+              continue
+            if row.subtopic not in taxonomy[subj][row.topic]:
+              errors.append(f'{row.question_id}: invalid subtopic {subj}/{row.topic}/{row.subtopic}')
+            skills = {s.strip() for s in str(row.skills).split(';') if s.strip()}
+            bad = skills - allowed_skills
+            if bad: errors.append(f'{row.question_id}: invalid skills {sorted(bad)}')
+            try:
+              conf = float(row.classification_confidence)
+              if not 0 <= conf <= 1: errors.append(f'{row.question_id}: confidence={conf}')
+            except Exception:
+              errors.append(f'{row.question_id}: invalid confidence')
+            if not str(row.concepts).strip(): errors.append(f'{row.question_id}: empty concepts')
 
-          q['context'] = q['question_text'].map(compact_text) + ' | ALT ' + q['alternatives'].map(compact_alt)
-          q = q[['question_id','year','exam_phase','subject','question_number','needs_review','has_image','context']]
-          q = q.sort_values(['year','exam_phase','subject','question_number'])
-          out = Path('data/_classification_compact')
-          out.mkdir(parents=True, exist_ok=True)
-          for year, part in q.groupby('year', sort=True):
-              part.to_csv(out / f'{int(year)}.tsv', sep='\t', index=False, lineterminator='\n')
-          print(f'exported {len(q)} compact rows')
+          if errors:
+            print('\n'.join(errors[:200]))
+            raise SystemExit(f'Classification validation failed with {len(errors)} error(s)')
+
+          classified = df.merge(mapping, on='question_id', how='left', validate='many_to_one')
+          if len(classified) != 8080 or classified.question_id.nunique() != 1616:
+            raise SystemExit('Unexpected final workbook row/question count')
+
+          out = Path('data/ita_multiple_choice_classified.xlsx')
+          with pd.ExcelWriter(out, engine='xlsxwriter') as writer:
+            classified.to_excel(writer, sheet_name='questions', index=False)
+            images.to_excel(writer, sheet_name='images', index=False)
+            header_fmt = writer.book.add_format({'bold': True, 'text_wrap': True, 'valign': 'top', 'border': 1})
+            wrap_fmt = writer.book.add_format({'text_wrap': True, 'valign': 'top'})
+            normal_fmt = writer.book.add_format({'valign': 'top'})
+            conf_fmt = writer.book.add_format({'num_format': '0.00', 'valign': 'top'})
+            bool_fmt = writer.book.add_format({'valign': 'top', 'align': 'center'})
+            for sheet_name, frame in [('questions', classified), ('images', images)]:
+              ws = writer.sheets[sheet_name]
+              ws.freeze_panes(1, 0)
+              ws.autofilter(0, 0, len(frame), len(frame.columns)-1)
+              ws.set_row(0, 30, header_fmt)
+              for i, col in enumerate(frame.columns):
+                if col in {'question_text','alternative_text'}: width, fmt = 55, wrap_fmt
+                elif col in {'concepts','skills'}: width, fmt = 36, wrap_fmt
+                elif col in {'source_pdf','image_path'}: width, fmt = 42, wrap_fmt
+                elif col in {'alternative_id','question_id','image_id'}: width, fmt = 30, normal_fmt
+                elif col == 'classification_confidence': width, fmt = 24, conf_fmt
+                elif col in {'has_image','ocr_used','needs_review','needs_topic_review'}: width, fmt = 18, bool_fmt
+                else: width, fmt = min(26, max(12, len(str(col))+2)), normal_fmt
+                ws.set_column(i, i, width, fmt)
+
+          if not zipfile.is_zipfile(out): raise SystemExit('Invalid XLSX')
+          print(f'classified_questions={mapping.question_id.nunique()}')
+          print(f'alternative_rows={len(classified)}')
+          print(f'needs_topic_review={int(mapping.needs_topic_review.astype(bool).sum())}')
+          print(f'mean_confidence={mapping.classification_confidence.astype(float).mean():.4f}')
+          print(f'workbook_bytes={out.stat().st_size}')
           PY
-      - name: Commit compact source
+      - name: Commit classified workbook
+        if: github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.full_name == github.repository
         run: |
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git add data/_classification_compact/
+          git add data/ita_multiple_choice_classified.xlsx
           git diff --cached --quiet && exit 0
-          git commit -m "Export compact ITA classification source"
+          git commit -m "Generate classified ITA workbook"
           git push origin HEAD:agent/classify-ita-multiple-choice
