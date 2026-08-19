@@ -1,0 +1,101 @@
+question_id	topic	subtopic	concepts	skills	classification_confidence	needs_topic_review	taxonomy_version
+ITA-MC-2016-SP-FIS-Q001	fluidos	hidrodinamica	lei_de_stokes; viscosidade; analise_dimensional	analise_dimensional; modelagem_fisica	0.99	false	1.0
+ITA-MC-2016-SP-FIS-Q002	mecanica	equilibrio_e_estatica	trelica; esforcos_em_barras; equilibrio	modelagem_fisica; interpretacao_de_figuras	0.99	false	1.0
+ITA-MC-2016-SP-FIS-Q003	mecanica	cinematica	movimento_uniforme; semaforos; velocidade_media	modelagem_fisica; calculo_numerico	0.99	false	1.0
+ITA-MC-2016-SP-FIS-Q004	ondas	movimento_harmonico_simples	massa_mola; oscilacao; choque_inelastico	modelagem_fisica; interpretacao_de_figuras	0.92	false	1.0
+ITA-MC-2016-SP-FIS-Q005	mecanica	cinematica	movimento_vertical; aceleracao_constante; queda_livre	modelagem_fisica; calculo_numerico	0.99	false	1.0
+ITA-MC-2016-SP-FIS-Q006	mecanica	movimento_circular	curva; tombamento; centro_de_gravidade	modelagem_fisica; resolucao_de_problemas	0.99	false	1.0
+ITA-MC-2016-SP-FIS-Q007	mecanica	gravitacao	sistema_binario; centro_de_massa; orbitas	argumentacao_logica; modelagem_fisica	0.99	false	1.0
+ITA-MC-2016-SP-FIS-Q008	fluidos	hidrostatica	empuxo; densidade; volume_vazio	modelagem_fisica; calculo_numerico	0.99	false	1.0
+ITA-MC-2016-SP-FIS-Q009	termodinamica	dilatacao	pendulo; dilatacao_termica; periodo	interpretacao_de_graficos; modelagem_fisica	0.95	false	1.0
+ITA-MC-2016-SP-FIS-Q010	mecanica	movimento_circular	pendulo; tensao; velocidade_maxima	modelagem_fisica; aplicacao_de_formulas	0.88	false	1.0
+ITA-MC-2016-SP-FIS-Q011	eletromagnetismo	forca_magnetica	fluido_condutor; efeito_hall; fem_motriz	modelagem_fisica; interpretacao_de_figuras	0.95	false	1.0
+ITA-MC-2016-SP-FIS-Q012	fluidos	hidrodinamica	tubo_de_pitot; bernoulli; velocidade_do_ar	modelagem_fisica; calculo_numerico	0.99	false	1.0
+ITA-MC-2016-SP-FIS-Q013	fluidos	hidrostatica	balao; empuxo; gas_ideal	modelagem_fisica; argumentacao_logica	0.95	false	1.0
+ITA-MC-2016-SP-FIS-Q014	fluidos	hidrostatica	flutuacao; liquidos_imisciveis; empuxo	modelagem_fisica; calculo_numerico	0.99	false	1.0
+ITA-MC-2016-SP-FIS-Q015	mecanica	equilibrio_e_estatica	atrito; placa_dobrada; equilibrio	modelagem_fisica; interpretacao_de_figuras	0.99	false	1.0
+ITA-MC-2016-SP-FIS-Q016	ondas	ondas_mecanicas	cordas_vibrantes; frequencia_fundamental; densidade_linear	modelagem_fisica; aplicacao_de_formulas	0.99	false	1.0
+ITA-MC-2016-SP-FIS-Q017	optica	refracao	fibra_optica; reflexao_total; raio_de_curvatura	modelagem_fisica; interpretacao_de_figuras	0.99	false	1.0
+ITA-MC-2016-SP-FIS-Q018	eletrostatica	capacitores	capacitores; chaveamento; carga_eletrica	modelagem_fisica; interpretacao_de_graficos	0.99	false	1.0
+ITA-MC-2016-SP-FIS-Q019	eletromagnetismo	inducao_eletromagnetica	lei_de_faraday; bobina; variacao_de_area	modelagem_fisica; aplicacao_de_formulas	0.99	false	1.0
+ITA-MC-2016-SP-FIS-Q020	fisica_moderna	relatividade	efeito_doppler_relativistico; redshift; velocidade_relativa	modelagem_fisica; calculo_numerico	0.99	false	1.0
+ITA-MC-2016-SP-ING-Q001	reading_comprehension	detail	business_topics; factual_detail	leitura_em_ingles; interpretacao_de_texto	0.99	false	1.0
+ITA-MC-2016-SP-ING-Q002	reading_comprehension	detail	brazilian_business; factual_detail	leitura_em_ingles; interpretacao_de_texto	0.99	false	1.0
+ITA-MC-2016-SP-ING-Q003	grammar	syntax	commas; apposition; punctuation	leitura_em_ingles; analise_linguistica	0.99	false	1.0
+ITA-MC-2016-SP-ING-Q004	vocabulary	meaning_in_context	lexical_substitution; contextual_meaning	leitura_em_ingles; analise_linguistica	0.99	false	1.0
+ITA-MC-2016-SP-ING-Q005	inference	author_intent	author_position; government; business_management	leitura_em_ingles; interpretacao_de_texto	0.99	false	1.0
+ITA-MC-2016-SP-ING-Q006	reading_comprehension	detail	management_models; companies; government_support	leitura_em_ingles; interpretacao_de_texto	0.99	false	1.0
+ITA-MC-2016-SP-ING-Q007	grammar	syntax	passive_voice; verbal_forms; grammatical_analysis	leitura_em_ingles; analise_linguistica	0.99	false	1.0
+ITA-MC-2016-SP-ING-Q008	reading_comprehension	detail	multiple_intelligences; definitions; figure	leitura_em_ingles; interpretacao_de_figuras	0.99	false	1.0
+ITA-MC-2016-SP-ING-Q009	reading_comprehension	detail	multiple_intelligences; visual_spatial; factual_detail	leitura_em_ingles; interpretacao_de_figuras	0.99	false	1.0
+ITA-MC-2016-SP-ING-Q010	grammar	syntax	ing_forms; pronouns; interrogatives	leitura_em_ingles; analise_linguistica	0.99	false	1.0
+ITA-MC-2016-SP-ING-Q011	reading_comprehension	detail	roy_plunkett; teflon; factual_detail	leitura_em_ingles; interpretacao_de_texto	0.99	false	1.0
+ITA-MC-2016-SP-ING-Q012	reading_comprehension	detail	ptfe_properties; factual_detail	leitura_em_ingles; interpretacao_de_texto	0.99	false	1.0
+ITA-MC-2016-SP-ING-Q013	reading_comprehension	detail	dupont; ptfe; factual_detail	leitura_em_ingles; interpretacao_de_texto	0.99	false	1.0
+ITA-MC-2016-SP-ING-Q014	reading_comprehension	detail	teflon_applications; industries; factual_detail	leitura_em_ingles; interpretacao_de_texto	0.99	false	1.0
+ITA-MC-2016-SP-ING-Q015	reading_comprehension	detail	neuroscience_studies; factual_detail	leitura_em_ingles; interpretacao_de_texto	0.99	false	1.0
+ITA-MC-2016-SP-ING-Q016	reading_comprehension	detail	social_media_photos; hiring; factual_detail	leitura_em_ingles; interpretacao_de_texto	0.99	false	1.0
+ITA-MC-2016-SP-ING-Q017	reading_comprehension	detail	study_design; participants; images	leitura_em_ingles; interpretacao_de_texto	0.99	false	1.0
+ITA-MC-2016-SP-ING-Q018	reading_comprehension	detail	face_width; personality; third_study	leitura_em_ingles; interpretacao_de_texto	0.99	false	1.0
+ITA-MC-2016-SP-ING-Q019	grammar	syntax	qualifiers; modifiers; lexical_function	leitura_em_ingles; analise_linguistica	0.99	false	1.0
+ITA-MC-2016-SP-ING-Q020	grammar	syntax	adjective_degree; comparative; superlative	leitura_em_ingles; analise_linguistica	0.99	false	1.0
+ITA-MC-2016-SP-MAT-Q001	funcoes	funcoes_reais	monotonicity; logarithmic_function; exponential_equation	argumentacao_logica; raciocinio_algebrico	0.90	false	1.0
+ITA-MC-2016-SP-MAT-Q002	logaritmos_e_exponenciais	logaritmos	number_of_digits; roots; logarithmic_order	modelagem_matematica; calculo_numerico	0.85	false	1.0
+ITA-MC-2016-SP-MAT-Q003	probabilidade	probabilidade_discreta	geometric_progression; combinations; random_selection	modelagem_matematica; calculo_numerico	0.99	false	1.0
+ITA-MC-2016-SP-MAT-Q004	trigonometria	identidades_trigonometricas	tangent; triple_angle; sine	aplicacao_de_formulas; raciocinio_algebrico	0.85	false	1.0
+ITA-MC-2016-SP-MAT-Q005	sequencias_e_progressoes	recorrencias	recursive_sequence; logarithm; convergence_properties	argumentacao_logica; raciocinio_algebrico	0.99	false	1.0
+ITA-MC-2016-SP-MAT-Q006	geometria_plana	poligonos	regular_polygon; inscribed_circle; circumscribed_circle	raciocinio_geometrico; argumentacao_logica	0.99	false	1.0
+ITA-MC-2016-SP-MAT-Q007	geometria_plana	triangulos	inscribed_triangle; circumradius; area	interpretacao_de_figuras; raciocinio_geometrico	0.95	false	1.0
+ITA-MC-2016-SP-MAT-Q008	matrizes_e_sistemas	sistemas_lineares	inconsistent_system; parameters; rank	argumentacao_logica; raciocinio_algebrico	0.99	false	1.0
+ITA-MC-2016-SP-MAT-Q009	geometria_analitica	circunferencia	circle; chord; central_angle	modelagem_matematica; raciocinio_geometrico	0.95	false	1.0
+ITA-MC-2016-SP-MAT-Q010	trigonometria	identidades_trigonometricas	right_triangle; angle_difference; sine	aplicacao_de_formulas; raciocinio_geometrico	0.90	false	1.0
+ITA-MC-2016-SP-MAT-Q011	matrizes_e_sistemas	matrizes	matrix_operations; matrix_expression	calculo_numerico; raciocinio_algebrico	0.70	true	1.0
+ITA-MC-2016-SP-MAT-Q012	numeros_complexos	forma_algebrica	complex_system; powers; roots	raciocinio_algebrico; argumentacao_logica	0.99	false	1.0
+ITA-MC-2016-SP-MAT-Q013	geometria_plana	circulos	chord; tangents; triangle_area	raciocinio_geometrico; interpretacao_de_figuras	0.99	false	1.0
+ITA-MC-2016-SP-MAT-Q014	geometria_analitica	retas	area_bisection; vertical_line; quadrilateral	modelagem_matematica; raciocinio_geometrico	0.99	false	1.0
+ITA-MC-2016-SP-MAT-Q015	polinomios	raizes_de_polinomios	polynomial_exponents; geometric_progression; complex_roots	raciocinio_algebrico; argumentacao_logica	0.95	false	1.0
+ITA-MC-2016-SP-MAT-Q016	geometria_plana	triangulos	equilateral_triangle; trisection_points; angle	raciocinio_geometrico; interpretacao_de_figuras	0.99	false	1.0
+ITA-MC-2016-SP-MAT-Q017	geometria_espacial	areas_e_volumes	spheres_in_cone; tangency; cone_volume	raciocinio_geometrico; modelagem_matematica	0.95	false	1.0
+ITA-MC-2016-SP-MAT-Q018	polinomios	raizes_de_polinomios	complex_polynomial; conjugate_roots; real_roots	raciocinio_algebrico; argumentacao_logica	0.85	false	1.0
+ITA-MC-2016-SP-MAT-Q019	combinatoria	principios_de_contagem	colored_cube; rotations; counting	argumentacao_logica; calculo_numerico	0.99	false	1.0
+ITA-MC-2016-SP-MAT-Q020	geometria_plana	triangulos	equilateral_triangle; angle_bisector; segment_length	raciocinio_geometrico; interpretacao_de_figuras	0.99	false	1.0
+ITA-MC-2016-SP-POR-Q021	interpretacao_textual	compreensao	career_choice; university; author_view	interpretacao_de_texto; argumentacao_logica	0.99	false	1.0
+ITA-MC-2016-SP-POR-Q022	interpretacao_textual	inferencia	author_attitude; education; careers	interpretacao_de_texto; argumentacao_logica	0.99	false	1.0
+ITA-MC-2016-SP-POR-Q023	interpretacao_textual	compreensao	social_expectation; professional_careers	interpretacao_de_texto; argumentacao_logica	0.99	false	1.0
+ITA-MC-2016-SP-POR-Q024	interpretacao_textual	coesao_e_coerencia	thesis_support; arguments; professional_choice	interpretacao_de_texto; argumentacao_logica	0.99	false	1.0
+ITA-MC-2016-SP-POR-Q025	interpretacao_textual	coesao_e_coerencia	anaphora; essa_ilusao; reference	analise_linguistica; interpretacao_de_texto	0.99	false	1.0
+ITA-MC-2016-SP-POR-Q026	variacao_linguistica	registro	colloquiality; informal_register	analise_linguistica; interpretacao_de_texto	0.99	false	1.0
+ITA-MC-2016-SP-POR-Q027	figuras_de_linguagem	geral	paradox; irony; thought_figures	analise_linguistica; interpretacao_de_texto	0.95	false	1.0
+ITA-MC-2016-SP-POR-Q028	semantica	significacao	verb_ter; semantic_value; contextual_meaning	analise_linguistica; interpretacao_de_texto	0.99	false	1.0
+ITA-MC-2016-SP-POR-Q029	gramatica	morfologia	adverb_ate; inclusion; semantic_value	analise_linguistica; argumentacao_logica	0.99	false	1.0
+ITA-MC-2016-SP-POR-Q030	interpretacao_textual	coesao_e_coerencia	common_theme; relation_between_texts	interpretacao_de_texto; argumentacao_logica	0.99	false	1.0
+ITA-MC-2016-SP-POR-Q031	interpretacao_textual	inferencia	tone; criticism; irony	interpretacao_de_texto; argumentacao_logica	0.99	false	1.0
+ITA-MC-2016-SP-POR-Q032	gramatica	pontuacao	comma; optional_punctuation; standard_grammar	analise_linguistica; argumentacao_logica	0.99	false	1.0
+ITA-MC-2016-SP-POR-Q033	figuras_de_linguagem	figuras_semanticas	quotation_marks; irony; lexical_emphasis	analise_linguistica; interpretacao_de_texto	0.95	false	1.0
+ITA-MC-2016-SP-POR-Q034	interpretacao_textual	inferencia	comic_humor; mafalda; pragmatic_inference	interpretacao_de_figuras; interpretacao_de_texto	0.95	false	1.0
+ITA-MC-2016-SP-POR-Q035	literatura	autores_e_obras	memorias_postumas; bras_cubas; machado_de_assis	interpretacao_de_texto; argumentacao_logica	0.99	false	1.0
+ITA-MC-2016-SP-POR-Q036	literatura	autores_e_obras	o_cortico; female_characters; naturalism	interpretacao_de_texto; argumentacao_logica	0.99	false	1.0
+ITA-MC-2016-SP-POR-Q037	literatura	analise_literaria	jose_paulo_paes; bucolic; social_critique	interpretacao_de_texto; argumentacao_logica	0.95	false	1.0
+ITA-MC-2016-SP-POR-Q038	literatura	autores_e_obras	sao_bernardo; madalena; paulo_honorio	interpretacao_de_texto; argumentacao_logica	0.99	false	1.0
+ITA-MC-2016-SP-POR-Q039	literatura	analise_literaria	ivan_junqueira; childhood; metaphor	interpretacao_de_texto; argumentacao_logica	0.95	false	1.0
+ITA-MC-2016-SP-POR-Q040	generos_textuais	generos_discursivos	adivinha; oral_tradition; poetic_reworking	interpretacao_de_texto; analise_linguistica	0.95	false	1.0
+ITA-MC-2016-SP-QUI-Q001	acidos_e_bases	geral	bronsted_lowry; lewis_acid_base; species_classification	argumentacao_logica; resolucao_de_problemas	0.99	false	1.0
+ITA-MC-2016-SP-QUI-Q002	solucoes	solubilidade	soluble_salts; solubility_rules	argumentacao_logica; resolucao_de_problemas	0.99	false	1.0
+ITA-MC-2016-SP-QUI-Q003	solucoes	propriedades_coligativas	boiling_point_elevation; ebullioscopy; molality	modelagem_matematica; calculo_numerico	0.99	false	1.0
+ITA-MC-2016-SP-QUI-Q004	cinetica_quimica	energia_de_ativacao	arrhenius_equation; activation_energy; preexponential_factor	interpretacao_de_graficos; argumentacao_logica	0.99	false	1.0
+ITA-MC-2016-SP-QUI-Q005	ligacoes_e_estrutura_molecular	forcas_intermoleculares	vapor_pressure; hydrocarbons; intermolecular_forces	argumentacao_logica; resolucao_de_problemas	0.99	false	1.0
+ITA-MC-2016-SP-QUI-Q006	estrutura_atomica	geral	mass_number; isotopes; atomic_structure	argumentacao_logica; resolucao_de_problemas	0.95	false	1.0
+ITA-MC-2016-SP-QUI-Q007	eletroquimica	potenciais_eletroquimicos	electrode_potential; nernst_equation; ph	modelagem_matematica; raciocinio_algebrico	0.99	false	1.0
+ITA-MC-2016-SP-QUI-Q008	gases	equacao_de_estado	gas_density; molar_mass; ideal_gas	modelagem_matematica; calculo_numerico	0.99	false	1.0
+ITA-MC-2016-SP-QUI-Q009	eletroquimica	pilhas	cell_potential; gibbs_free_energy; redox	modelagem_matematica; calculo_numerico	0.99	false	1.0
+ITA-MC-2016-SP-QUI-Q010	equilibrio_quimico	constante_de_equilibrio	hi_equilibrium; partial_pressure; equilibrium_constant	modelagem_matematica; calculo_numerico	0.99	false	1.0
+ITA-MC-2016-SP-QUI-Q011	eletroquimica	eletrolise	electrolysis; inert_electrodes; products_at_electrodes	argumentacao_logica; interpretacao_de_figuras	0.99	false	1.0
+ITA-MC-2016-SP-QUI-Q012	estequiometria	reagente_limitante	purity; reaction_yield; stoichiometry	modelagem_matematica; calculo_numerico	0.99	false	1.0
+ITA-MC-2016-SP-QUI-Q013	termoquimica	lei_de_hess	enthalpy_of_formation; combustion; vaporization_of_water	modelagem_matematica; calculo_numerico	0.99	false	1.0
+ITA-MC-2016-SP-QUI-Q014	fisica_moderna	efeito_fotoeletrico	photoelectric_effect; work_function; photon_energy	modelagem_matematica; calculo_numerico	0.99	false	1.0
+ITA-MC-2016-SP-QUI-Q015	gases	equacao_de_estado	kinetic_energy; absolute_temperature; ideal_gas	interpretacao_de_graficos; argumentacao_logica	0.99	false	1.0
+ITA-MC-2016-SP-QUI-Q016	gases	equacao_de_estado	gas_expansion; work; path_dependence	argumentacao_logica; interpretacao_de_graficos	0.95	false	1.0
+ITA-MC-2016-SP-QUI-Q017	cinetica_quimica	velocidade_de_reacao	rate_law; mechanism; elementary_steps	argumentacao_logica; resolucao_de_problemas	0.99	false	1.0
+ITA-MC-2016-SP-QUI-Q018	cinetica_quimica	velocidade_de_reacao	zero_order; surface_catalysis; reaction_time	modelagem_matematica; calculo_numerico	0.99	false	1.0
+ITA-MC-2016-SP-QUI-Q019	eletroquimica	eletrolise	copper_sulfate; electrolysis; inert_electrodes	argumentacao_logica; resolucao_de_problemas	0.99	false	1.0
+ITA-MC-2016-SP-QUI-Q020	estrutura_atomica	geral	atomic_energy; hydrogen_atom; electronic_ground_state	argumentacao_logica; resolucao_de_problemas	0.95	false	1.0
