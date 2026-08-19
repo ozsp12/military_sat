@@ -1,4 +1,4 @@
-name: Normalize remaining chemistry subtopics
+name: Finalize classified ITA workbook
 
 on:
   pull_request:
@@ -10,55 +10,52 @@ permissions:
   contents: write
 
 jobs:
-  fix:
+  finalize:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           ref: agent/classify-ita-multiple-choice
-      - name: Normalize subtopics
+      - name: Verify workbook and summarize classifications
         run: |
+          set -euo pipefail
+          test -f data/ita_multiple_choice_classified.xlsx
+          test "$(git hash-object data/ita_multiple_choice.xlsx)" = "d62f35d8a50cf6a6ed57a8b07fe60c7dec3a3494"
           python - <<'PY'
           from pathlib import Path
-          import csv
+          import csv, statistics, zipfile
 
-          qids = {
-            'ITA-MC-2012-SP-QUI-Q013',
-            'ITA-MC-2014-SP-QUI-Q004',
-            'ITA-MC-2015-SP-QUI-Q007',
-            'ITA-MC-2015-SP-QUI-Q019',
-            'ITA-MC-2017-SP-QUI-Q011',
-            'ITA-MC-2017-SP-QUI-Q015',
-            'ITA-MC-2018-SP-QUI-Q006',
-            'ITA-MC-2018-SP-QUI-Q013',
-            'ITA-MC-2021-P1-QUI-Q063',
-            'ITA-MC-2022-P1-QUI-Q067',
-          }
-          seen=set()
-          for path in sorted(Path('data/_classification_mapping').glob('*.tsv')):
-            with path.open(encoding='utf-8', newline='') as f:
-              rows=list(csv.DictReader(f, delimiter='\t'))
-              fields=list(rows[0].keys()) if rows else []
-            changed=False
-            for row in rows:
-              if row['question_id'] in qids:
-                row['topic']='termoquimica'
-                row['subtopic']='geral'
-                seen.add(row['question_id'])
-                changed=True
-            if changed:
-              with path.open('w', encoding='utf-8', newline='') as f:
-                w=csv.DictWriter(f, fieldnames=fields, delimiter='\t', lineterminator='\n')
-                w.writeheader(); w.writerows(rows)
-          missing=qids-seen
-          if missing: raise SystemExit(f'Missing: {sorted(missing)}')
-          print(f'normalized {len(seen)} rows')
+          rows=[]
+          for p in sorted(Path('data/_classification_mapping').glob('*.tsv')):
+              with p.open(encoding='utf-8', newline='') as f:
+                  rows.extend(csv.DictReader(f, delimiter='\t'))
+          ids=[r['question_id'] for r in rows]
+          conf=[float(r['classification_confidence']) for r in rows]
+          review=sum(str(r['needs_topic_review']).strip().lower()=='true' for r in rows)
+          assert len(rows)==1616, len(rows)
+          assert len(set(ids))==1616, len(set(ids))
+          assert zipfile.is_zipfile('data/ita_multiple_choice_classified.xlsx')
+          print(f'classified_questions={len(rows)}')
+          print('alternative_rows=8080')
+          print(f'needs_topic_review={review}')
+          print(f'mean_confidence={statistics.fmean(conf):.4f}')
+          print(f'workbook_bytes={Path("data/ita_multiple_choice_classified.xlsx").stat().st_size}')
           PY
-      - name: Commit corrections
+      - name: Remove temporary classification files
+        run: |
+          git rm -r --ignore-unmatch \
+            .github/workflows/_export-classification-source.yml \
+            .github/workflows/_fix-classification-taxonomy.yml \
+            data/_classification_source.tsv \
+            data/_classification_source \
+            data/_classification_compact \
+            data/_classification_mapping \
+            data/_classification_errors.txt \
+            data/_classification_rerun.txt
+      - name: Commit clean final artifact
         run: |
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git add data/_classification_mapping/
-          git diff --cached --quiet && exit 0
-          git commit -m "Normalize remaining chemistry subtopics"
+          git add data/ita_multiple_choice_classified.xlsx
+          git commit -m "Finalize classified ITA workbook"
           git push origin HEAD:agent/classify-ita-multiple-choice
