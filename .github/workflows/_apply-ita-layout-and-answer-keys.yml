@@ -133,11 +133,13 @@ jobs:
           python -m pip install -r requirements.txt
           python - <<'PY'
           import importlib.util
+          import sys
           from pathlib import Path
 
           path = Path("scripts/download_ita_provas.py")
           spec = importlib.util.spec_from_file_location("ita_downloader", path)
           module = importlib.util.module_from_spec(spec)
+          sys.modules[spec.name] = module
           spec.loader.exec_module(module)
 
           with module.build_session() as session:
