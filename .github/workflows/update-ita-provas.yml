@@ -39,8 +39,8 @@ jobs:
       - name: Validate downloader
         run: python -m compileall -q scripts/download_ita_provas.py
 
-      - name: Download official ITA exams
-        run: python scripts/download_ita_provas.py --output ita_provas --refresh --min-files 95
+      - name: Download official ITA exams and first-phase answer keys
+        run: python scripts/download_ita_provas.py --output ita_provas --refresh --min-files 114
 
       - name: Validate archive
         shell: bash
@@ -48,7 +48,13 @@ jobs:
           set -euo pipefail
           count="$(find ita_provas -type f -name '*.pdf' | wc -l)"
           echo "PDF count: ${count}"
-          test "${count}" -ge 95
+          test "${count}" -ge 114
+
+          gabaritos="$(find ita_provas -type f -iname 'gabarito*.pdf' ! -iname '*_2f*' | wc -l)"
+          echo "First-phase/single-phase answer keys: ${gabaritos}"
+          test "${gabaritos}" -ge 19
+          test -z "$(find ita_provas -type f -iname 'gabarito*_2f*.pdf' -print -quit)"
+
           test -s ita_provas/manifest.xlsx
           test ! -e ita_provas/manifest.csv
           python - <<'PY'
