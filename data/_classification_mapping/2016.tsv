@@ -92,7 +92,7 @@ ITA-MC-2016-SP-QUI-Q010	equilibrio_quimico	constante_de_equilibrio	hi_equilibriu
 ITA-MC-2016-SP-QUI-Q011	eletroquimica	eletrolise	electrolysis; inert_electrodes; products_at_electrodes	argumentacao_logica; interpretacao_de_figuras	0.99	false	1.0
 ITA-MC-2016-SP-QUI-Q012	estequiometria	reagente_limitante	purity; reaction_yield; stoichiometry	modelagem_matematica; calculo_numerico	0.99	false	1.0
 ITA-MC-2016-SP-QUI-Q013	termoquimica	lei_de_hess	enthalpy_of_formation; combustion; vaporization_of_water	modelagem_matematica; calculo_numerico	0.99	false	1.0
-ITA-MC-2016-SP-QUI-Q014	fisica_moderna	efeito_fotoeletrico	photoelectric_effect; work_function; photon_energy	modelagem_matematica; calculo_numerico	0.99	false	1.0
+ITA-MC-2016-SP-QUI-Q014	estrutura_atomica	espectros_atomicos	photoelectric_effect; work_function; photon_energy	modelagem_matematica; calculo_numerico	0.99	false	1.0
 ITA-MC-2016-SP-QUI-Q015	gases	equacao_de_estado	kinetic_energy; absolute_temperature; ideal_gas	interpretacao_de_graficos; argumentacao_logica	0.99	false	1.0
 ITA-MC-2016-SP-QUI-Q016	gases	equacao_de_estado	gas_expansion; work; path_dependence	argumentacao_logica; interpretacao_de_graficos	0.95	false	1.0
 ITA-MC-2016-SP-QUI-Q017	cinetica_quimica	velocidade_de_reacao	rate_law; mechanism; elementary_steps	argumentacao_logica; resolucao_de_problemas	0.99	false	1.0

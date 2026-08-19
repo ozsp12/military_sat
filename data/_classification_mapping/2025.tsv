@@ -27,12 +27,12 @@ ITA-MC-2025-P1-QUI-Q025	cinetica_quimica	velocidade_de_reacao	combustao; frente_
 ITA-MC-2025-P1-QUI-Q026	quimica_organica	reacoes_organicas	oxidacao_de_alceno; permanganato; clivagem_oxidativa	argumentacao_logica; resolucao_de_problemas	0.99	false	1.0
 ITA-MC-2025-P1-QUI-Q027	propriedades_periodicas	tendencias_periodicas	afinidade_eletronica; raio_atomico; energia_de_ionizacao	argumentacao_logica; resolucao_de_problemas	0.99	false	1.0
 ITA-MC-2025-P1-QUI-Q028	gases	equacao_de_estado	lei_geral_dos_gases; pressao; temperatura; volume	modelagem_matematica; calculo_numerico	0.99	false	1.0
-ITA-MC-2025-P1-QUI-Q029	eletroquimica	titulacao	acido_ascorbico; iodo; titulacao_redox	modelagem_matematica; calculo_numerico	0.92	false	1.0
-ITA-MC-2025-P1-QUI-Q030	termoquimica	leis_da_termodinamica	energia_livre_de_gibbs; espontaneidade; temperatura	modelagem_matematica; calculo_numerico	0.99	false	1.0
+ITA-MC-2025-P1-QUI-Q029	eletroquimica	geral	acido_ascorbico; iodo; titulacao_redox	modelagem_matematica; calculo_numerico	0.92	false	1.0
+ITA-MC-2025-P1-QUI-Q030	termoquimica	geral	energia_livre_de_gibbs; espontaneidade; temperatura	modelagem_matematica; calculo_numerico	0.99	false	1.0
 ITA-MC-2025-P1-QUI-Q031	cinetica_quimica	energia_de_ativacao	arrhenius; constantes_de_velocidade; energia_de_ativacao	modelagem_matematica; calculo_numerico	0.99	false	1.0
 ITA-MC-2025-P1-QUI-Q032	ligacoes_e_estrutura_molecular	geometria_molecular	pcl5; substituicao_por_fluor; polaridade_molecular	interpretacao_de_figuras; argumentacao_logica	0.99	false	1.0
 ITA-MC-2025-P1-QUI-Q033	solucoes	solubilidade	recristalizacao; solubilidade_em_funcao_da_temperatura; purificacao	argumentacao_logica; resolucao_de_problemas	0.99	false	1.0
-ITA-MC-2025-P1-QUI-Q034	termoquimica	leis_da_termodinamica	processos_termodinamicos; energia_interna; trabalho; calor	argumentacao_logica; resolucao_de_problemas	0.99	false	1.0
+ITA-MC-2025-P1-QUI-Q034	termoquimica	geral	processos_termodinamicos; energia_interna; trabalho; calor	argumentacao_logica; resolucao_de_problemas	0.99	false	1.0
 ITA-MC-2025-P1-QUI-Q035	quimica_organica	geral	numero_de_oxidacao_do_carbono; compostos_organicos; redox	argumentacao_logica; resolucao_de_problemas	0.99	false	1.0
 ITA-MC-2025-P1-QUI-Q036	estrutura_atomica	espectros_atomicos	energia_do_foton; comprimento_de_onda; iniciacao_fotoquimica	modelagem_matematica; calculo_numerico	0.95	false	1.0
 ITA-MC-2025-P1-ING-Q037	reading_comprehension	detail	astrophysics; cosmic_discoveries; factual_detail	leitura_em_ingles; interpretacao_de_texto	0.99	false	1.0

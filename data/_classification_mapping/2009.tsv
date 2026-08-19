@@ -91,7 +91,7 @@ ITA-MC-2009-SP-QUI-Q009	propriedades_periodicas	tendencias_periodicas	afinidade_
 ITA-MC-2009-SP-QUI-Q010	equilibrio_quimico	constante_de_equilibrio	grau_de_dissociacao; equilibrio_gasoso; kp	modelagem_matematica; aplicacao_de_formulas	0.85	false	1.0
 ITA-MC-2009-SP-QUI-Q011	cinetica_quimica	velocidade_de_reacao	velocidade_estequiometrica; consumo_de_reagente; estequiometria	modelagem_matematica; calculo_numerico	0.99	false	1.0
 ITA-MC-2009-SP-QUI-Q012	quimica_nuclear	radioatividade	meia_vida; decaimento_exponencial; iodo_131; cesio_137	modelagem_matematica; calculo_numerico	0.99	false	1.0
-ITA-MC-2009-SP-QUI-Q013	gases	equacao_de_estado	leis_dos_gases; gas_ideal; temperatura_pressao_volume	argumentacao_logica; resolucao_de_problemas	0.99	false	1.0
+ITA-MC-2009-SP-QUI-Q013	termoquimica	geral	leis_dos_gases; gas_ideal; temperatura_pressao_volume	argumentacao_logica; resolucao_de_problemas	0.99	false	1.0
 ITA-MC-2009-SP-QUI-Q014	estrutura_atomica	espectros_atomicos	teste_da_chama; sodio; emissao_atomica	argumentacao_logica; resolucao_de_problemas	0.99	false	1.0
 ITA-MC-2009-SP-QUI-Q015	solucoes	geral	coloides; coagulacao; carga_ionica	argumentacao_logica; resolucao_de_problemas	0.95	false	1.0
 ITA-MC-2009-SP-QUI-Q016	acidos_e_bases	ph_e_poh	acido_fraco; grau_de_dissociacao; pka; ph	modelagem_matematica; calculo_numerico	0.85	false	1.0

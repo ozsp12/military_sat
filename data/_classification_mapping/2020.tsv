@@ -9,7 +9,7 @@ ITA-MC-2020-P1-FIS-Q007	fisica_moderna	relatividade	dilatacao_do_tempo; contraca
 ITA-MC-2020-P1-FIS-Q008	termodinamica	dilatacao	pendulo; dilatacao_linear; periodo	modelagem_fisica; calculo_numerico	0.99	false	1.0
 ITA-MC-2020-P1-FIS-Q009	termodinamica	gases	aquecimento_eletrico; gas_ideal; processo_termodinamico	modelagem_fisica; interpretacao_de_graficos	0.88	false	1.0
 ITA-MC-2020-P1-FIS-Q010	eletromagnetismo	torque_magnetico	bobina_em_cilindro; campo_magnetico; torque	modelagem_fisica; interpretacao_de_figuras	0.92	false	1.0
-ITA-MC-2020-P1-FIS-Q011	ondas	interferencia	interferencia_sonora; diferenca_de_caminho; velocidade_do_som	modelagem_fisica; interpretacao_de_figuras	0.99	false	1.0
+ITA-MC-2020-P1-FIS-Q011	ondas	ondas_mecanicas	interferencia_sonora; diferenca_de_caminho; velocidade_do_som	modelagem_fisica; interpretacao_de_figuras	0.99	false	1.0
 ITA-MC-2020-P1-FIS-Q012	circuitos_eletricos	circuitos_cc	reostato; capacitor; carga_eletrica	modelagem_fisica; interpretacao_de_figuras	0.95	false	1.0
 ITA-MC-2020-P1-FIS-Q013	eletrostatica	carga_campo_potencial	cargas_em_equilibrio; pendulos; repulsao_eletrostatica	modelagem_fisica; interpretacao_de_figuras	0.99	false	1.0
 ITA-MC-2020-P1-FIS-Q014	optica	refracao	lente_delgada; bloco_transparente; refracao	modelagem_fisica; interpretacao_de_figuras	0.95	false	1.0

@@ -88,7 +88,7 @@ ITA-MC-2011-SP-QUI-Q006	eletroquimica	eletrolise	lei_de_faraday; eletrodeposicao
 ITA-MC-2011-SP-QUI-Q007	quimica_organica	geral	combustao_fuliginosa; razao_carbono_hidrogenio; aromaticidade	argumentacao_logica; resolucao_de_problemas	0.85	false	1.0
 ITA-MC-2011-SP-QUI-Q008	quimica_inorganica	funcoes_inorganicas	oxidos_neutros; classificacao_de_oxidos	argumentacao_logica; resolucao_de_problemas	0.85	false	1.0
 ITA-MC-2011-SP-QUI-Q009	quimica_organica	polimeros	polimeros_condutores; conjugacao; estrutura_polimerica	argumentacao_logica; resolucao_de_problemas	0.85	false	1.0
-ITA-MC-2011-SP-QUI-Q010	termoquimica	leis_da_termodinamica	sublimacao; energia_interna; trabalho; calor	argumentacao_logica; resolucao_de_problemas	0.85	false	1.0
+ITA-MC-2011-SP-QUI-Q010	termoquimica	geral	sublimacao; energia_interna; trabalho; calor	argumentacao_logica; resolucao_de_problemas	0.85	false	1.0
 ITA-MC-2011-SP-QUI-Q011	eletroquimica	potenciais_eletroquimicos	potencial_de_eletrodo; eletrodo_de_referencia; aluminio	modelagem_matematica; calculo_numerico	0.85	false	1.0
 ITA-MC-2011-SP-QUI-Q012	quimica_inorganica	reacoes_inorganicas	hidrolise; anfoterismo; aluminio; zinco	argumentacao_logica; resolucao_de_problemas	0.99	false	1.0
 ITA-MC-2011-SP-QUI-Q013	quimica_organica	reacoes_organicas	transesterificacao; biodiesel; triacilglicerol	argumentacao_logica; resolucao_de_problemas	0.85	false	1.0

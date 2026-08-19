@@ -25,7 +25,7 @@ ITA-MC-2026-P1-FIS-Q023	ondas	efeito_doppler	ultrassom; fluxo_sanguineo; efeito_
 ITA-MC-2026-P1-FIS-Q024	eletromagnetismo	ondas_eletromagneticas	radiacao_monocromatica; comprimento_de_onda; intensidade	interpretacao_de_figuras; modelagem_fisica	0.75	false	1.0
 ITA-MC-2026-P1-QUI-Q025	cinetica_quimica	energia_de_ativacao	catalisador_heterogeneo; arrhenius; tempo_de_reacao	modelagem_matematica; calculo_numerico	0.99	false	1.0
 ITA-MC-2026-P1-QUI-Q026	propriedades_periodicas	tendencias_periodicas	energia_de_ionizacao; geometria_molecular; polaridade	argumentacao_logica; resolucao_de_problemas	0.90	false	1.0
-ITA-MC-2026-P1-QUI-Q027	termoquimica	calorimetria	calor_especifico; equilibrio_termico; calorimetria	modelagem_matematica; calculo_numerico	0.99	false	1.0
+ITA-MC-2026-P1-QUI-Q027	termoquimica	geral	calor_especifico; equilibrio_termico; calorimetria	modelagem_matematica; calculo_numerico	0.99	false	1.0
 ITA-MC-2026-P1-QUI-Q028	quimica_inorganica	geral	efeito_estufa; gases_estufa; potencial_de_aquecimento	argumentacao_logica; resolucao_de_problemas	0.90	false	1.0
 ITA-MC-2026-P1-QUI-Q029	eletroquimica	pilhas	celula_galvanica; ferro_cobre; corrosao	argumentacao_logica; interpretacao_de_figuras	0.99	false	1.0
 ITA-MC-2026-P1-QUI-Q030	equilibrio_quimico	constante_de_equilibrio	equilibrio_aquoso; constante_de_equilibrio; ebulioscopia	modelagem_matematica; calculo_numerico	0.90	false	1.0
