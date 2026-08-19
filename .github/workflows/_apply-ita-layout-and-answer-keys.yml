@@ -1,0 +1,172 @@
+name: Apply ITA data layout and answer-key changes
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - ".github/workflows/_apply-ita-layout-and-answer-keys.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/rename-data-and-download-answer-keys
+          fetch-depth: 1
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Apply repository changes
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+
+          old = Path("data")
+          new = Path("ita_data")
+          if old.exists():
+              if new.exists():
+                  raise SystemExit("Both data/ and ita_data/ exist")
+              old.rename(new)
+          elif not new.exists():
+              raise SystemExit("Neither data/ nor ita_data/ exists")
+
+          builder = Path("scripts/build_ita_datasets.py")
+          text = builder.read_text(encoding="utf-8")
+          old_line = 'DATA_ROOT = Path("data")'
+          new_line = 'DATA_ROOT = Path("ita_data")'
+          if old_line in text:
+              text = text.replace(old_line, new_line, 1)
+          elif new_line not in text:
+              raise SystemExit("Could not locate DATA_ROOT in builder")
+          builder.write_text(text, encoding="utf-8")
+
+          build_wf = Path(".github/workflows/build-ita-datasets.yml")
+          text = build_wf.read_text(encoding="utf-8")
+          text = text.replace('data/', 'ita_data/')
+          text = text.replace('git add -A data', 'git add -A ita_data')
+          build_wf.write_text(text, encoding="utf-8")
+
+          readme = Path("README.md")
+          text = readme.read_text(encoding="utf-8")
+          text = text.replace(
+              "The archive contains the exam papers only; answer keys are excluded by default.",
+              "The archive contains the exam papers and the official first-phase answer keys. Second-phase answer keys are excluded.",
+          )
+          text = text.replace(
+              "│   ├── 2026_fase1.pdf\n",
+              "│   ├── 2026_fase1.pdf\n│   ├── gabarito_2026.pdf\n",
+          )
+          text = text.replace(
+              "\nTo include answer keys as well:\n\n```bash\npython scripts/download_ita_provas.py --include-gabaritos\n```\n",
+              "",
+          )
+          text = text.replace('data/', 'ita_data/')
+          readme.write_text(text, encoding="utf-8")
+
+          data_readme = Path("ita_data/README.md")
+          text = data_readme.read_text(encoding="utf-8")
+          if text.startswith("# Data\n"):
+              text = "# ITA data\n" + text[len("# Data\n"):]
+          data_readme.write_text(text, encoding="utf-8")
+
+          downloader = Path("scripts/download_ita_provas.py")
+          text = downloader.read_text(encoding="utf-8")
+          text = text.replace(
+              '"""Download official ITA entrance-exam PDFs and organize them by year."""',
+              '"""Download official ITA exam PDFs and first-phase answer keys by year."""',
+              1,
+          )
+          old_sig = '''def discover_files(\n    session: requests.Session,\n    include_gabaritos: bool = False,\n) -> list[ExamFile]:\n'''
+          new_sig = '''def is_answer_key(label: str, href: str) -> bool:\n    return "gabarito" in f"{label} {href}".casefold()\n\n\ndef is_second_phase_answer_key(label: str, href: str) -> bool:\n    if not is_answer_key(label, href):\n        return False\n    path = unquote(urlparse(href).path).casefold()\n    return bool(\n        re.search(r"(?:_2f(?:[._-]|$)|fase[_ -]?2|2[_ -]?fase)", path)\n    )\n\n\ndef discover_files(session: requests.Session) -> list[ExamFile]:\n'''
+          if old_sig in text:
+              text = text.replace(old_sig, new_sig, 1)
+          elif "def is_second_phase_answer_key" not in text:
+              raise SystemExit("Could not update discover_files signature")
+
+          old_filter = '''            if not include_gabaritos and (\n                "gabarito" in label.casefold() or "gabarito" in href.casefold()\n            ):\n                continue\n'''
+          new_filter = '''            if is_second_phase_answer_key(label, href):\n                continue\n'''
+          if old_filter in text:
+              text = text.replace(old_filter, new_filter, 1)
+          elif new_filter not in text:
+              raise SystemExit("Could not update answer-key filter")
+
+          old_arg = '''    parser.add_argument(\n        "--include-gabaritos",\n        action="store_true",\n        help="Also download answer-key PDFs.",\n    )\n'''
+          if old_arg in text:
+              text = text.replace(old_arg, "", 1)
+          elif "--include-gabaritos" in text:
+              raise SystemExit("Could not remove deprecated --include-gabaritos argument")
+
+          old_call = "files = discover_files(session, include_gabaritos=args.include_gabaritos)"
+          if old_call in text:
+              text = text.replace(old_call, "files = discover_files(session)", 1)
+          elif "files = discover_files(session)" not in text:
+              raise SystemExit("Could not update discover_files call")
+
+          downloader.write_text(text, encoding="utf-8")
+
+          archive_wf = Path(".github/workflows/update-ita-provas.yml")
+          text = archive_wf.read_text(encoding="utf-8")
+          text = text.replace(
+              "python scripts/download_ita_provas.py --output ita_provas --refresh --min-files 95",
+              "python scripts/download_ita_provas.py --output ita_provas --refresh --min-files 114",
+          )
+          text = text.replace('test "${count}" -ge 95', 'test "${count}" -ge 114')
+          marker = '''          test "${count}" -ge 114\n          test -s ita_provas/manifest.xlsx\n'''
+          addition = '''          test "${count}" -ge 114\n          gabaritos="$(find ita_provas -type f -iname 'gabarito*.pdf' ! -iname '*_2f*' | wc -l)"\n          echo "First-phase/single-phase answer keys: ${gabaritos}"\n          test "${gabaritos}" -ge 19\n          test -z "$(find ita_provas -type f -iname 'gabarito*_2f*.pdf' -print -quit)"\n          test -s ita_provas/manifest.xlsx\n'''
+          if marker in text:
+              text = text.replace(marker, addition, 1)
+          elif "First-phase/single-phase answer keys" not in text:
+              raise SystemExit("Could not add answer-key archive validation")
+          archive_wf.write_text(text, encoding="utf-8")
+          PY
+
+      - name: Validate downloader discovery
+        run: |
+          python -m pip install -r requirements.txt
+          python - <<'PY'
+          import importlib.util
+          from pathlib import Path
+
+          path = Path("scripts/download_ita_provas.py")
+          spec = importlib.util.spec_from_file_location("ita_downloader", path)
+          module = importlib.util.module_from_spec(spec)
+          spec.loader.exec_module(module)
+
+          with module.build_session() as session:
+              files = module.discover_files(session)
+
+          keys = [item for item in files if module.is_answer_key(item.label, item.url)]
+          second_phase = [item for item in keys if module.is_second_phase_answer_key(item.label, item.url)]
+          if len(files) < 114:
+              raise SystemExit(f"Expected at least 114 archive PDFs, discovered {len(files)}")
+          if len(keys) < 19:
+              raise SystemExit(f"Expected at least 19 first/single-phase answer keys, discovered {len(keys)}")
+          if second_phase:
+              raise SystemExit(f"Second-phase answer keys leaked into discovery: {second_phase}")
+          years = {item.year for item in keys}
+          missing_years = sorted(set(range(2008, 2027)) - years)
+          if missing_years:
+              raise SystemExit(f"Missing answer-key years: {missing_years}")
+          print(f"discovered={len(files)} answer_keys={len(keys)} years={min(years)}-{max(years)}")
+          PY
+          python -m compileall -q scripts/download_ita_provas.py scripts/build_ita_datasets.py
+
+      - name: Remove temporary workflow and commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          git rm .github/workflows/_apply-ita-layout-and-answer-keys.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --cached --check
+          git commit -m "Rename ITA data directory and archive answer keys"
+          git push origin HEAD:agent/rename-data-and-download-answer-keys
