@@ -85,7 +85,7 @@ ITA-MC-2015-SP-QUI-Q003	quimica_nuclear	radioatividade	plutonium_238; half_life;
 ITA-MC-2015-SP-QUI-Q004	acidos_e_bases	ph_e_poh	weak_base; pkb; ph	modelagem_matematica; calculo_numerico	0.99	false	1.0
 ITA-MC-2015-SP-QUI-Q005	cinetica_quimica	velocidade_de_reacao	reaction_order; integrated_rate_law; concentration_time_graph	interpretacao_de_graficos; argumentacao_logica	0.99	false	1.0
 ITA-MC-2015-SP-QUI-Q006	quimica_organica	polimeros	melting_temperature; polymer_structure; intermolecular_forces	argumentacao_logica; interpretacao_de_figuras	0.90	false	1.0
-ITA-MC-2015-SP-QUI-Q007	termoquimica	leis_da_termodinamica	gibbs_free_energy; spontaneity; equilibrium	interpretacao_de_graficos; argumentacao_logica	0.95	false	1.0
+ITA-MC-2015-SP-QUI-Q007	termoquimica	geral	gibbs_free_energy; spontaneity; equilibrium	interpretacao_de_graficos; argumentacao_logica	0.95	false	1.0
 ITA-MC-2015-SP-QUI-Q008	quimica_inorganica	reacoes_inorganicas	chlorine_disproportionation; hypochlorite; chlorate	argumentacao_logica; resolucao_de_problemas	0.99	false	1.0
 ITA-MC-2015-SP-QUI-Q009	acidos_e_bases	ph_e_poh	acetic_acid; hydrochloric_acid; degree_of_dissociation	modelagem_matematica; calculo_numerico	0.99	false	1.0
 ITA-MC-2015-SP-QUI-Q010	termoquimica	entalpia	enthalpy_of_vaporization; electrical_heating; calorimetry	modelagem_matematica; calculo_numerico	0.99	false	1.0
@@ -97,5 +97,5 @@ ITA-MC-2015-SP-QUI-Q015	ligacoes_e_estrutura_molecular	ligacoes_quimicas	potenti
 ITA-MC-2015-SP-QUI-Q016	solucoes	propriedades_coligativas	vapor_pressure; equilibrium_between_beakers; solvent_transfer	modelagem_matematica; argumentacao_logica	0.90	false	1.0
 ITA-MC-2015-SP-QUI-Q017	termoquimica	geral	heat_capacity; specific_heat; phases_of_matter	argumentacao_logica; resolucao_de_problemas	0.95	false	1.0
 ITA-MC-2015-SP-QUI-Q018	acidos_e_bases	geral	lewis_acid; bf3; nh3	argumentacao_logica; resolucao_de_problemas	0.99	false	1.0
-ITA-MC-2015-SP-QUI-Q019	termoquimica	mudancas_de_fase	density_temperature_curve; fusion; boiling	interpretacao_de_graficos; argumentacao_logica	0.99	false	1.0
+ITA-MC-2015-SP-QUI-Q019	termoquimica	geral	density_temperature_curve; fusion; boiling	interpretacao_de_graficos; argumentacao_logica	0.99	false	1.0
 ITA-MC-2015-SP-QUI-Q020	gases	geral	atmospheric_pressure; torricelli; historical_experiments	argumentacao_logica; resolucao_de_problemas	0.95	false	1.0

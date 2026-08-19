@@ -65,7 +65,7 @@ ITA-MC-2022-P1-QUI-Q063	estrutura_atomica	modelos_atomicos	experimento_de_ruther
 ITA-MC-2022-P1-QUI-Q064	quimica_inorganica	geral	metodo_cientifico; hipotese; experimento; conclusao	argumentacao_logica; resolucao_de_problemas	0.85	false	1.0
 ITA-MC-2022-P1-QUI-Q065	equilibrio_quimico	principio_de_le_chatelier	equilibrio_gasoso; pressao; temperatura	argumentacao_logica; resolucao_de_problemas	0.99	false	1.0
 ITA-MC-2022-P1-QUI-Q066	quimica_organica	reacoes_organicas	substituicao_aromatica; grupos_diretores; reatividade	argumentacao_logica; resolucao_de_problemas	0.99	false	1.0
-ITA-MC-2022-P1-QUI-Q067	termoquimica	leis_da_termodinamica	processos_termodinamicos; sistema_isolado; entropia	argumentacao_logica; resolucao_de_problemas	0.99	false	1.0
+ITA-MC-2022-P1-QUI-Q067	termoquimica	geral	processos_termodinamicos; sistema_isolado; entropia	argumentacao_logica; resolucao_de_problemas	0.99	false	1.0
 ITA-MC-2022-P1-QUI-Q068	equilibrio_quimico	constante_de_equilibrio	pcl5; kp; perturbacao_do_equilibrio	modelagem_matematica; calculo_numerico	0.99	false	1.0
 ITA-MC-2022-P1-QUI-Q069	ligacoes_e_estrutura_molecular	geometria_molecular	tricloreto; lewis; vsepr	argumentacao_logica; resolucao_de_problemas	0.99	false	1.0
 ITA-MC-2022-P1-QUI-Q070	solucoes	propriedades_coligativas	equilibrio_de_fases; soluto_nao_volatil; propriedades_coligativas	argumentacao_logica; resolucao_de_problemas	0.99	false	1.0

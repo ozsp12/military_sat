@@ -89,11 +89,11 @@ ITA-MC-2017-SP-QUI-Q007	acidos_e_bases	titulacao	titration_curves; acid_strength
 ITA-MC-2017-SP-QUI-Q008	solucoes	concentracao	mass_percent; solution_mixing; ideal_solution	modelagem_matematica; calculo_numerico	0.99	false	1.0
 ITA-MC-2017-SP-QUI-Q009	ligacoes_e_estrutura_molecular	ligacoes_quimicas	van_arkel_ketelaar; covalent_character; electronegativity	interpretacao_de_figuras; argumentacao_logica	0.99	false	1.0
 ITA-MC-2017-SP-QUI-Q010	quimica_organica	reacoes_organicas	amide_formation; esterification; oxidation	argumentacao_logica; resolucao_de_problemas	0.99	false	1.0
-ITA-MC-2017-SP-QUI-Q011	termoquimica	leis_da_termodinamica	state_functions; internal_energy; enthalpy	argumentacao_logica; resolucao_de_problemas	0.99	false	1.0
+ITA-MC-2017-SP-QUI-Q011	termoquimica	geral	state_functions; internal_energy; enthalpy	argumentacao_logica; resolucao_de_problemas	0.99	false	1.0
 ITA-MC-2017-SP-QUI-Q012	eletroquimica	potenciais_eletroquimicos	cell_potential; hydrogen_electrode; ph	modelagem_matematica; calculo_numerico	0.99	false	1.0
 ITA-MC-2017-SP-QUI-Q013	solucoes	propriedades_coligativas	vapor_pressure_lowering; raoult; nacl	modelagem_matematica; calculo_numerico	0.99	false	1.0
 ITA-MC-2017-SP-QUI-Q014	cinetica_quimica	velocidade_de_reacao	first_order_decomposition; rate_constant; concentration_time	modelagem_matematica; calculo_numerico	0.99	false	1.0
-ITA-MC-2017-SP-QUI-Q015	termoquimica	leis_da_termodinamica	pulsejet_cycle; thermodynamic_cycle; pv_diagram	interpretacao_de_graficos; argumentacao_logica	0.95	false	1.0
+ITA-MC-2017-SP-QUI-Q015	termoquimica	geral	pulsejet_cycle; thermodynamic_cycle; pv_diagram	interpretacao_de_graficos; argumentacao_logica	0.95	false	1.0
 ITA-MC-2017-SP-QUI-Q016	eletroquimica	eletrolise	electrodeposition; nickel; faraday_law	modelagem_matematica; calculo_numerico	0.99	false	1.0
 ITA-MC-2017-SP-QUI-Q017	estrutura_atomica	geral	ionization_energy; dipole_moment; atomic_orbitals	argumentacao_logica; resolucao_de_problemas	0.90	false	1.0
 ITA-MC-2017-SP-QUI-Q018	quimica_organica	reacoes_organicas	amide; ester; chirality; oxidation	argumentacao_logica; resolucao_de_problemas	0.99	false	1.0

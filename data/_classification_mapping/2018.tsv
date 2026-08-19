@@ -84,14 +84,14 @@ ITA-MC-2018-SP-QUI-Q002	estrutura_atomica	numeros_quanticos	orbital_energy; 2s_2
 ITA-MC-2018-SP-QUI-Q003	ligacoes_e_estrutura_molecular	forcas_intermoleculares	boiling_point; polarizability; halomethanes	argumentacao_logica; resolucao_de_problemas	0.99	false	1.0
 ITA-MC-2018-SP-QUI-Q004	quimica_organica	isomeria	structural_isomers; alkenes; dichloro_compounds	argumentacao_logica; resolucao_de_problemas	0.99	false	1.0
 ITA-MC-2018-SP-QUI-Q005	gases	misturas_gasosas	partial_pressure; ideal_gases; masses	modelagem_matematica; calculo_numerico	0.99	false	1.0
-ITA-MC-2018-SP-QUI-Q006	termoquimica	calorimetria	microwave_heating; photon_energy; water_heating	modelagem_matematica; calculo_numerico	0.90	false	1.0
+ITA-MC-2018-SP-QUI-Q006	termoquimica	geral	microwave_heating; photon_energy; water_heating	modelagem_matematica; calculo_numerico	0.90	false	1.0
 ITA-MC-2018-SP-QUI-Q007	gases	misturas_gasosas	partial_pressure; gas_mixture; ideal_gas	modelagem_matematica; calculo_numerico	0.99	false	1.0
 ITA-MC-2018-SP-QUI-Q008	cinetica_quimica	geral	elementary_reaction; mechanism; single_step	argumentacao_logica; resolucao_de_problemas	0.99	false	1.0
 ITA-MC-2018-SP-QUI-Q009	quimica_nuclear	reacoes_nucleares	critical_mass; fission; nuclear_stability	argumentacao_logica; resolucao_de_problemas	0.99	false	1.0
 ITA-MC-2018-SP-QUI-Q010	quimica_organica	reacoes_organicas	biodiesel; transesterification; triglycerides	argumentacao_logica; resolucao_de_problemas	0.99	false	1.0
 ITA-MC-2018-SP-QUI-Q011	quimica_organica	geral	petroleum_fractionation; cracking; refining	argumentacao_logica; resolucao_de_problemas	0.99	false	1.0
 ITA-MC-2018-SP-QUI-Q012	quimica_organica	reacoes_organicas	hydration_of_alkene; alcohol; oxidation	argumentacao_logica; resolucao_de_problemas	0.99	false	1.0
-ITA-MC-2018-SP-QUI-Q013	termoquimica	calorimetria	adiabatic_container; thermal_equilibrium; water_mixing	modelagem_matematica; argumentacao_logica	0.99	false	1.0
+ITA-MC-2018-SP-QUI-Q013	termoquimica	geral	adiabatic_container; thermal_equilibrium; water_mixing	modelagem_matematica; argumentacao_logica	0.99	false	1.0
 ITA-MC-2018-SP-QUI-Q014	solucoes	propriedades_coligativas	osmotic_pressure; cryoscopy; vapor_pressure	argumentacao_logica; resolucao_de_problemas	0.99	false	1.0
 ITA-MC-2018-SP-QUI-Q015	equilibrio_quimico	equilibrio_de_solubilidade	selective_precipitation; metal_chlorides; solubility	argumentacao_logica; resolucao_de_problemas	0.99	false	1.0
 ITA-MC-2018-SP-QUI-Q016	acidos_e_bases	ph_e_poh	weak_acid_base; phenol; aniline; ph	modelagem_matematica; argumentacao_logica	0.99	false	1.0

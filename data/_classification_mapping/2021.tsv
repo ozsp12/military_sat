@@ -61,7 +61,7 @@ ITA-MC-2021-P1-QUI-Q059	cinetica_quimica	velocidade_de_reacao	lei_de_velocidade;
 ITA-MC-2021-P1-QUI-Q060	ligacoes_e_estrutura_molecular	ligacoes_quimicas	comprimento_de_ligacao; energia_de_ligacao; multiplicidade	argumentacao_logica; resolucao_de_problemas	0.99	false	1.0
 ITA-MC-2021-P1-QUI-Q061	solucoes	concentracao	condutividade_molar; concentracao; eletrólitos	modelagem_matematica; argumentacao_logica	0.90	false	1.0
 ITA-MC-2021-P1-QUI-Q062	termoquimica	geral	analise_termogravimetrica; decomposicao_termica; curva_tga	interpretacao_de_graficos; argumentacao_logica	0.95	false	1.0
-ITA-MC-2021-P1-QUI-Q063	termoquimica	leis_da_termodinamica	entropia; reversibilidade; funcoes_de_estado	argumentacao_logica; resolucao_de_problemas	0.99	false	1.0
+ITA-MC-2021-P1-QUI-Q063	termoquimica	geral	entropia; reversibilidade; funcoes_de_estado	argumentacao_logica; resolucao_de_problemas	0.99	false	1.0
 ITA-MC-2021-P1-QUI-Q064	ligacoes_e_estrutura_molecular	forcas_intermoleculares	fases_condensadas; forcas_intermolectares; ions	argumentacao_logica; resolucao_de_problemas	0.99	false	1.0
 ITA-MC-2021-P1-QUI-Q065	estrutura_atomica	espectros_atomicos	luz; frequencia; espectro_eletromagnetico	argumentacao_logica; resolucao_de_problemas	0.95	false	1.0
 ITA-MC-2021-P1-QUI-Q066	eletroquimica	potenciais_eletroquimicos	titulacao_redox; permanganato; potencial_de_eletrodo	modelagem_matematica; calculo_numerico	0.99	false	1.0

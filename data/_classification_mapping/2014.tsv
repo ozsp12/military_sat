@@ -82,7 +82,7 @@ ITA-MC-2014-SP-POR-Q040	literatura	analise_literaria	drummond; munch; interartes
 ITA-MC-2014-SP-QUI-Q001	solucoes	geral	metanol; agua_deuterada; mistura_liquida	argumentacao_logica; resolucao_de_problemas	0.85	false	1.0
 ITA-MC-2014-SP-QUI-Q002	quimica_organica	reacoes_organicas	acido_acetico; pcl5; cloreto_de_acila	argumentacao_logica; resolucao_de_problemas	0.95	false	1.0
 ITA-MC-2014-SP-QUI-Q003	quimica_organica	funcoes_organicas	acido_tartarico; solubilidade; acido_carboxilico	argumentacao_logica; resolucao_de_problemas	0.85	false	1.0
-ITA-MC-2014-SP-QUI-Q004	termoquimica	leis_da_termodinamica	fusao; entalpia; entropia	modelagem_matematica; calculo_numerico	0.99	false	1.0
+ITA-MC-2014-SP-QUI-Q004	termoquimica	geral	fusao; entalpia; entropia	modelagem_matematica; calculo_numerico	0.99	false	1.0
 ITA-MC-2014-SP-QUI-Q005	quimica_inorganica	reacoes_inorganicas	cu2o; cu2s; redox; aquecimento	argumentacao_logica; resolucao_de_problemas	0.85	false	1.0
 ITA-MC-2014-SP-QUI-Q006	estrutura_atomica	modelos_atomicos	modelo_de_bohr; momento_angular; quantizacao	aplicacao_de_formulas; resolucao_de_problemas	0.85	false	1.0
 ITA-MC-2014-SP-QUI-Q007	acidos_e_bases	geral	base_conjugada; bronsted_lowry; ion_hidroxila	argumentacao_logica; resolucao_de_problemas	0.99	false	1.0
