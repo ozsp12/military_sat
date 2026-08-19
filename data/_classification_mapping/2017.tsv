@@ -1,0 +1,101 @@
+question_id	topic	subtopic	concepts	skills	classification_confidence	needs_topic_review	taxonomy_version
+ITA-MC-2017-SP-FIS-Q001	fisica_moderna	relatividade	ondas_gravitacionais; analise_dimensional; quadrupolo	analise_dimensional; modelagem_fisica	0.95	false	1.0
+ITA-MC-2017-SP-FIS-Q002	mecanica	equilibrio_e_estatica	atrito; bastao; equilibrio	modelagem_fisica; interpretacao_de_figuras	0.99	false	1.0
+ITA-MC-2017-SP-FIS-Q003	mecanica	dinamica	referencial_acelerado; atrito; movimento_relativo	modelagem_fisica; interpretacao_de_figuras	0.99	false	1.0
+ITA-MC-2017-SP-FIS-Q004	eletrostatica	capacitores	capacitancia_esferica; conservacao_de_carga; potencial	modelagem_fisica; calculo_numerico	0.95	false	1.0
+ITA-MC-2017-SP-FIS-Q005	mecanica	dinamica	atrito_estatico; tracao_dianteira; rolamento	argumentacao_logica; modelagem_fisica	0.99	false	1.0
+ITA-MC-2017-SP-FIS-Q006	ondas	movimento_harmonico_simples	pendulo; massa_variavel; periodo	modelagem_fisica; interpretacao_de_figuras	0.90	false	1.0
+ITA-MC-2017-SP-FIS-Q007	mecanica	equilibrio_e_estatica	haste; pendulo; equilibrio	modelagem_fisica; interpretacao_de_figuras	0.95	false	1.0
+ITA-MC-2017-SP-FIS-Q008	eletrostatica	carga_campo_potencial	plasma; cargas; tempo_de_voo	interpretacao_de_graficos; modelagem_fisica	0.80	false	1.0
+ITA-MC-2017-SP-FIS-Q009	fisica_moderna	efeito_fotoeletrico	funcao_trabalho; frequencia; emissao_de_eletrons	argumentacao_logica; resolucao_de_problemas	0.99	false	1.0
+ITA-MC-2017-SP-FIS-Q010	optica	difracao	fenda; difracao; fotodetectores	modelagem_fisica; interpretacao_de_figuras	0.95	false	1.0
+ITA-MC-2017-SP-FIS-Q011	mecanica	equilibrio_e_estatica	molas_em_serie_vertical; equilibrio; deformacao	modelagem_fisica; argumentacao_logica	0.99	false	1.0
+ITA-MC-2017-SP-FIS-Q012	eletromagnetismo	inducao_eletromagnetica	betatron; inducao; aceleracao_de_eletrons	modelagem_fisica; calculo_numerico	0.95	false	1.0
+ITA-MC-2017-SP-FIS-Q013	eletromagnetismo	forca_magnetica	carga_em_campo_magnetico; gravidade; movimento	modelagem_fisica; aplicacao_de_formulas	0.99	false	1.0
+ITA-MC-2017-SP-FIS-Q014	mecanica	cinematica	grafico_velocidade_distancia; tempo; deslocamento	interpretacao_de_graficos; modelagem_fisica	0.99	false	1.0
+ITA-MC-2017-SP-FIS-Q015	fisica_moderna	fisica_atomica	espectro_do_hidrogenio; modelo_de_bohr; linhas_espectrais	interpretacao_de_tabelas; argumentacao_logica	0.99	false	1.0
+ITA-MC-2017-SP-FIS-Q016	mecanica	gravitacao	orbita_proxima_a_superficie; periodo; densidade_planetaria	modelagem_fisica; calculo_numerico	0.99	false	1.0
+ITA-MC-2017-SP-FIS-Q017	ondas	ondas_mecanicas	interferencia_sonora; diferenca_de_caminho; comprimento_de_onda	modelagem_fisica; raciocinio_geometrico	0.99	false	1.0
+ITA-MC-2017-SP-FIS-Q018	termodinamica	maquinas_termicas	ciclo_termodinamico; eficiencia; ciclo_de_carnot	interpretacao_de_graficos; modelagem_fisica	0.99	false	1.0
+ITA-MC-2017-SP-FIS-Q019	ondas	ondas_mecanicas	propagacao_em_corda; velocidade_de_onda; fotografias_da_onda	interpretacao_de_graficos; modelagem_fisica	0.99	false	1.0
+ITA-MC-2017-SP-FIS-Q020	fluidos	hidrodinamica	jato_de_agua; vazao; potencia_mecanica	modelagem_fisica; interpretacao_de_figuras	0.95	false	1.0
+ITA-MC-2017-SP-ING-Q001	text_structure	organization	text_genre; narrative_type	leitura_em_ingles; interpretacao_de_texto	0.99	false	1.0
+ITA-MC-2017-SP-ING-Q002	text_structure	organization	narrator; direct_and_indirect_speech	leitura_em_ingles; interpretacao_de_texto	0.99	false	1.0
+ITA-MC-2017-SP-ING-Q003	reading_comprehension	detail	geri_taylor; alzheimer; factual_detail	leitura_em_ingles; interpretacao_de_texto	0.99	false	1.0
+ITA-MC-2017-SP-ING-Q004	reading_comprehension	detail	neurologist; diagnostic_procedures; factual_detail	leitura_em_ingles; interpretacao_de_texto	0.99	false	1.0
+ITA-MC-2017-SP-ING-Q005	reading_comprehension	detail	diagnosis; symptoms; factual_detail	leitura_em_ingles; interpretacao_de_texto	0.99	false	1.0
+ITA-MC-2017-SP-ING-Q006	grammar	syntax	adverbs; word_class; grammatical_function	leitura_em_ingles; analise_linguistica	0.99	false	1.0
+ITA-MC-2017-SP-ING-Q007	grammar	syntax	qualifier; modifier; grammatical_function	leitura_em_ingles; analise_linguistica	0.99	false	1.0
+ITA-MC-2017-SP-ING-Q008	reading_comprehension	detail	finance_professionals; boot_camp; factual_detail	leitura_em_ingles; interpretacao_de_texto	0.99	false	1.0
+ITA-MC-2017-SP-ING-Q009	reading_comprehension	detail	patrick_makanza; career; factual_detail	leitura_em_ingles; interpretacao_de_texto	0.99	false	1.0
+ITA-MC-2017-SP-ING-Q010	reference_and_cohesion	connectors	despite; concession; paraphrase	leitura_em_ingles; analise_linguistica	0.99	false	1.0
+ITA-MC-2017-SP-ING-Q011	grammar	syntax	agent_of_clause; syntactic_function	leitura_em_ingles; analise_linguistica	0.95	false	1.0
+ITA-MC-2017-SP-ING-Q012	reference_and_cohesion	pronoun_reference	whose; antecedent; reference	leitura_em_ingles; analise_linguistica	0.99	false	1.0
+ITA-MC-2017-SP-ING-Q013	inference	implicit_meaning	conversation; annoyance; information_overload	leitura_em_ingles; interpretacao_de_texto	0.99	false	1.0
+ITA-MC-2017-SP-ING-Q014	reading_comprehension	inference	apps; functionality; implied_information	leitura_em_ingles; interpretacao_de_texto	0.99	false	1.0
+ITA-MC-2017-SP-ING-Q015	reference_and_cohesion	pronoun_reference	app_references; pronouns; antecedents	leitura_em_ingles; analise_linguistica	0.99	false	1.0
+ITA-MC-2017-SP-ING-Q016	grammar	syntax	word_classes; grammatical_classification	leitura_em_ingles; analise_linguistica	0.99	false	1.0
+ITA-MC-2017-SP-ING-Q017	reading_comprehension	main_idea	starshot_project; objective; nanocraft	leitura_em_ingles; interpretacao_de_texto	0.99	false	1.0
+ITA-MC-2017-SP-ING-Q018	reading_comprehension	detail	starshot; travel_time; factual_detail	leitura_em_ingles; interpretacao_de_texto	0.99	false	1.0
+ITA-MC-2017-SP-ING-Q019	reading_comprehension	detail	starshot_execution; spacecraft; factual_detail	leitura_em_ingles; interpretacao_de_texto	0.99	false	1.0
+ITA-MC-2017-SP-ING-Q020	grammar	syntax	light; adjective_degree; homonymy	leitura_em_ingles; analise_linguistica	0.95	false	1.0
+ITA-MC-2017-SP-MAT-Q001	funcoes	funcoes_reais	bijection; injection; surjection; finite_sets	argumentacao_logica; raciocinio_algebrico	0.99	false	1.0
+ITA-MC-2017-SP-MAT-Q002	trigonometria	equacoes_trigonometricas	secant; cosecant; zeros	resolucao_de_problemas; raciocinio_algebrico	0.99	false	1.0
+ITA-MC-2017-SP-MAT-Q003	sequencias_e_progressoes	progressao_geometrica	geometric_progression; arithmetic_progression; system	resolucao_de_problemas; raciocinio_algebrico	0.99	false	1.0
+ITA-MC-2017-SP-MAT-Q004	trigonometria	geral	arcsine; tangent; maximum	resolucao_de_problemas; raciocinio_algebrico	0.85	false	1.0
+ITA-MC-2017-SP-MAT-Q005	geometria_analitica	retas	square; diagonal_on_line; area	modelagem_matematica; raciocinio_geometrico	0.99	false	1.0
+ITA-MC-2017-SP-MAT-Q006	algebra	equacoes_e_inequacoes	system_of_rational_equations; absolute_values	resolucao_de_problemas; raciocinio_algebrico	0.75	false	1.0
+ITA-MC-2017-SP-MAT-Q007	algebra	equacoes_e_inequacoes	integer_solutions; inequality; absolute_value	resolucao_de_problemas; raciocinio_algebrico	0.85	false	1.0
+ITA-MC-2017-SP-MAT-Q008	conjuntos	operacoes_com_conjuntos	cartesian_product; products; cardinality	argumentacao_logica; calculo_numerico	0.95	false	1.0
+ITA-MC-2017-SP-MAT-Q009	geometria_analitica	geral	region_intersection; absolute_value_graph; circle_area	interpretacao_de_graficos; modelagem_matematica	0.95	false	1.0
+ITA-MC-2017-SP-MAT-Q010	logaritmos_e_exponenciais	logaritmos	logarithm_identities; change_of_base	argumentacao_logica; raciocinio_algebrico	0.85	false	1.0
+ITA-MC-2017-SP-MAT-Q011	matrizes_e_sistemas	determinantes	similar_matrices; determinant; polynomial_in_matrix	resolucao_de_problemas; raciocinio_algebrico	0.99	false	1.0
+ITA-MC-2017-SP-MAT-Q012	geometria_analitica	circunferencia	circles; tangency; distance_between_centers	modelagem_matematica; raciocinio_geometrico	0.99	false	1.0
+ITA-MC-2017-SP-MAT-Q013	teoria_dos_numeros	divisibilidade	integer_factorization; primes; irrational_roots	argumentacao_logica; raciocinio_algebrico	0.99	false	1.0
+ITA-MC-2017-SP-MAT-Q014	probabilidade	probabilidade_discreta	sequences_without_repetition; permutations; probability	modelagem_matematica; calculo_numerico	0.99	false	1.0
+ITA-MC-2017-SP-MAT-Q015	numeros_complexos	forma_polar	complex_power; roots_of_unity; counting_solutions	resolucao_de_problemas; raciocinio_algebrico	0.95	false	1.0
+ITA-MC-2017-SP-MAT-Q016	geometria_plana	triangulos	right_triangle; altitude; midpoint; area	raciocinio_geometrico; calculo_numerico	0.99	false	1.0
+ITA-MC-2017-SP-MAT-Q017	geometria_plana	circulos	tangent_circles; regular_hexagon; perimeter	interpretacao_de_figuras; raciocinio_geometrico	0.99	false	1.0
+ITA-MC-2017-SP-MAT-Q018	geometria_analitica	conicas	locus; purely_imaginary_root; parabola	modelagem_matematica; raciocinio_algebrico	0.95	false	1.0
+ITA-MC-2017-SP-MAT-Q019	probabilidade	probabilidade_discreta	independent_shots; at_least_one_success	modelagem_matematica; calculo_numerico	0.99	false	1.0
+ITA-MC-2017-SP-MAT-Q020	geometria_plana	triangulos	angle_bisector; triangle; segment_length	interpretacao_de_figuras; raciocinio_geometrico	0.95	false	1.0
+ITA-MC-2017-SP-POR-Q021	interpretacao_textual	inferencia	author_position; media; manipulation	interpretacao_de_texto; argumentacao_logica	0.99	false	1.0
+ITA-MC-2017-SP-POR-Q022	interpretacao_textual	compreensao	public_opinion; media; subjective_factors	interpretacao_de_texto; argumentacao_logica	0.99	false	1.0
+ITA-MC-2017-SP-POR-Q023	interpretacao_textual	coesao_e_coerencia	argumentative_strategies; rhetorical_question; examples	interpretacao_de_texto; argumentacao_logica	0.99	false	1.0
+ITA-MC-2017-SP-POR-Q024	gramatica	sintaxe	passive_voice_with_se; verbal_voice	analise_linguistica; argumentacao_logica	0.99	false	1.0
+ITA-MC-2017-SP-POR-Q025	gramatica	regencia	verbal_transitivity; direct_indirect_objects	analise_linguistica; argumentacao_logica	0.99	false	1.0
+ITA-MC-2017-SP-POR-Q026	interpretacao_textual	compreensao	fake_news; ethics; internet	interpretacao_de_texto; argumentacao_logica	0.99	false	1.0
+ITA-MC-2017-SP-POR-Q027	interpretacao_textual	compreensao	journalism; reputation; misinformation	interpretacao_de_texto; argumentacao_logica	0.99	false	1.0
+ITA-MC-2017-SP-POR-Q028	interpretacao_textual	compreensao	causes_of_fake_news; online_journalism	interpretacao_de_texto; argumentacao_logica	0.99	false	1.0
+ITA-MC-2017-SP-POR-Q029	gramatica	sintaxe	relative_pronoun_que; syntactic_function	analise_linguistica; argumentacao_logica	0.99	false	1.0
+ITA-MC-2017-SP-POR-Q030	interpretacao_textual	coesao_e_coerencia	relation_between_texts; media; information	interpretacao_de_texto; argumentacao_logica	0.99	false	1.0
+ITA-MC-2017-SP-POR-Q031	interpretacao_textual	inferencia	calvin; television_audience; behavior	interpretacao_de_figuras; interpretacao_de_texto	0.99	false	1.0
+ITA-MC-2017-SP-POR-Q032	gramatica	sintaxe	conjunction_e; semantic_relation; opposition	analise_linguistica; interpretacao_de_figuras	0.95	false	1.0
+ITA-MC-2017-SP-POR-Q033	interpretacao_textual	inferencia	mafalda; media; audience_control	interpretacao_de_figuras; interpretacao_de_texto	0.95	false	1.0
+ITA-MC-2017-SP-POR-Q034	interpretacao_textual	coesao_e_coerencia	comparison_of_comics; calvin; mafalda	interpretacao_de_figuras; interpretacao_de_texto	0.99	false	1.0
+ITA-MC-2017-SP-POR-Q035	literatura	autores_e_obras	memorias_de_um_sargento; vidigal; power_and_private_sphere	interpretacao_de_texto; argumentacao_logica	0.99	false	1.0
+ITA-MC-2017-SP-POR-Q036	literatura	autores_e_obras	til; jose_de_alencar; romantic_heroine	interpretacao_de_texto; argumentacao_logica	0.99	false	1.0
+ITA-MC-2017-SP-POR-Q037	literatura	autores_e_obras	fogo_morto; jose_lins_do_rego; characters	interpretacao_de_texto; argumentacao_logica	0.99	false	1.0
+ITA-MC-2017-SP-POR-Q038	literatura	analise_literaria	manuel_bandeira; irene_no_ceu; affection	interpretacao_de_texto; argumentacao_logica	0.99	false	1.0
+ITA-MC-2017-SP-POR-Q039	literatura	analise_literaria	intertextuality; bach_no_ceu; irene_no_ceu	interpretacao_de_texto; argumentacao_logica	0.99	false	1.0
+ITA-MC-2017-SP-POR-Q040	literatura	analise_literaria	frasco_de_ambar; lyrical_voice; perfume_and_love	interpretacao_de_texto; argumentacao_logica	0.95	false	1.0
+ITA-MC-2017-SP-QUI-Q001	eletroquimica	pilhas	sacrificial_metals; corrosion; electrode_potentials	argumentacao_logica; resolucao_de_problemas	0.99	false	1.0
+ITA-MC-2017-SP-QUI-Q002	estequiometria	mol_e_massas	mercury; sulfuric_acid; gas_stoichiometry	modelagem_matematica; calculo_numerico	0.95	false	1.0
+ITA-MC-2017-SP-QUI-Q003	gases	misturas_gasosas	partial_pressures; mass_fraction; gas_mixture	modelagem_matematica; calculo_numerico	0.99	false	1.0
+ITA-MC-2017-SP-QUI-Q004	cinetica_quimica	velocidade_de_reacao	first_order; half_life; rate_constant	argumentacao_logica; resolucao_de_problemas	0.99	false	1.0
+ITA-MC-2017-SP-QUI-Q005	ligacoes_e_estrutura_molecular	ligacoes_quimicas	ceramics; thermal_barriers; bonding_and_materials	argumentacao_logica; resolucao_de_problemas	0.85	false	1.0
+ITA-MC-2017-SP-QUI-Q006	solucoes	propriedades_coligativas	freezing_point_depression; cryoscopy; ethanol_water	modelagem_matematica; calculo_numerico	0.99	false	1.0
+ITA-MC-2017-SP-QUI-Q007	acidos_e_bases	titulacao	titration_curves; acid_strength; equivalence_region	interpretacao_de_graficos; argumentacao_logica	0.99	false	1.0
+ITA-MC-2017-SP-QUI-Q008	solucoes	concentracao	mass_percent; solution_mixing; ideal_solution	modelagem_matematica; calculo_numerico	0.99	false	1.0
+ITA-MC-2017-SP-QUI-Q009	ligacoes_e_estrutura_molecular	ligacoes_quimicas	van_arkel_ketelaar; covalent_character; electronegativity	interpretacao_de_figuras; argumentacao_logica	0.99	false	1.0
+ITA-MC-2017-SP-QUI-Q010	quimica_organica	reacoes_organicas	amide_formation; esterification; oxidation	argumentacao_logica; resolucao_de_problemas	0.99	false	1.0
+ITA-MC-2017-SP-QUI-Q011	termoquimica	leis_da_termodinamica	state_functions; internal_energy; enthalpy	argumentacao_logica; resolucao_de_problemas	0.99	false	1.0
+ITA-MC-2017-SP-QUI-Q012	eletroquimica	potenciais_eletroquimicos	cell_potential; hydrogen_electrode; ph	modelagem_matematica; calculo_numerico	0.99	false	1.0
+ITA-MC-2017-SP-QUI-Q013	solucoes	propriedades_coligativas	vapor_pressure_lowering; raoult; nacl	modelagem_matematica; calculo_numerico	0.99	false	1.0
+ITA-MC-2017-SP-QUI-Q014	cinetica_quimica	velocidade_de_reacao	first_order_decomposition; rate_constant; concentration_time	modelagem_matematica; calculo_numerico	0.99	false	1.0
+ITA-MC-2017-SP-QUI-Q015	termoquimica	leis_da_termodinamica	pulsejet_cycle; thermodynamic_cycle; pv_diagram	interpretacao_de_graficos; argumentacao_logica	0.95	false	1.0
+ITA-MC-2017-SP-QUI-Q016	eletroquimica	eletrolise	electrodeposition; nickel; faraday_law	modelagem_matematica; calculo_numerico	0.99	false	1.0
+ITA-MC-2017-SP-QUI-Q017	estrutura_atomica	geral	ionization_energy; dipole_moment; atomic_orbitals	argumentacao_logica; resolucao_de_problemas	0.90	false	1.0
+ITA-MC-2017-SP-QUI-Q018	quimica_organica	reacoes_organicas	amide; ester; chirality; oxidation	argumentacao_logica; resolucao_de_problemas	0.99	false	1.0
+ITA-MC-2017-SP-QUI-Q019	quimica_inorganica	reacoes_inorganicas	breathalyzer; dichromate; colorimetry	argumentacao_logica; resolucao_de_problemas	0.80	false	1.0
+ITA-MC-2017-SP-QUI-Q020	quimica_organica	isomeria	c5h10; structural_isomers; bromine_test	argumentacao_logica; resolucao_de_problemas	0.99	false	1.0
