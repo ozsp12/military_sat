@@ -1,4 +1,4 @@
-# Data
+# ITA data
 
 Generated datasets derived from the archived ITA entrance-exam PDFs.
 

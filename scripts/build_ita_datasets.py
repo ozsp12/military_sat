@@ -21,7 +21,7 @@ import pandas as pd
 import pymupdf as fitz
 
 INPUT_ROOT = Path("ita_provas")
-DATA_ROOT = Path("data")
+DATA_ROOT = Path("ita_data")
 
 MC_DATASET = DATA_ROOT / "ita_multiple_choice.parquet"
 MC_IMAGE_DATASET = DATA_ROOT / "ita_multiple_choice_images.parquet"

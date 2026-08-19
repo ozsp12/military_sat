@@ -66,10 +66,10 @@ jobs:
           import zipfile
           import pandas as pd
 
-          mc = pd.read_parquet("data/ita_multiple_choice.parquet")
-          essay = pd.read_parquet("data/ita_essay_questions.parquet")
-          mc_images = pd.read_parquet("data/ita_multiple_choice_images.parquet")
-          essay_images = pd.read_parquet("data/ita_essay_questions_images.parquet")
+          mc = pd.read_parquet("ita_data/ita_multiple_choice.parquet")
+          essay = pd.read_parquet("ita_data/ita_essay_questions.parquet")
+          mc_images = pd.read_parquet("ita_data/ita_multiple_choice_images.parquet")
+          essay_images = pd.read_parquet("ita_data/ita_essay_questions_images.parquet")
           mcq = mc.drop_duplicates("question_id")
 
           if len(mcq) != 1616:
@@ -161,7 +161,7 @@ jobs:
           if essay["source_pdf"].str.contains("redacao", case=False, na=False).any():
               raise SystemExit("Writing-prompt PDF leaked into essay dataset")
 
-          for path in (Path("data/ita_multiple_choice.xlsx"), Path("data/ita_essay_questions.xlsx")):
+          for path in (Path("ita_data/ita_multiple_choice.xlsx"), Path("ita_data/ita_essay_questions.xlsx")):
               if not path.is_file() or not zipfile.is_zipfile(path):
                   raise SystemExit(f"Invalid XLSX: {path}")
 
@@ -180,7 +180,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          git add -A data
+          git add -A ita_data
           if git diff --cached --quiet; then
             echo "ITA datasets are already up to date."
             exit 0

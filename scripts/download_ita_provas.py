@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Download official ITA entrance-exam PDFs and organize them by year."""
+"""Download official ITA exam PDFs and first-phase answer keys by year."""
 
 from __future__ import annotations
 
@@ -49,10 +49,18 @@ def build_session() -> requests.Session:
     return session
 
 
-def discover_files(
-    session: requests.Session,
-    include_gabaritos: bool = False,
-) -> list[ExamFile]:
+def is_answer_key(label: str, href: str) -> bool:
+    return "gabarito" in f"{label} {href}".casefold()
+
+
+def is_second_phase_answer_key(label: str, href: str) -> bool:
+    if not is_answer_key(label, href):
+        return False
+    path = unquote(urlparse(href).path).casefold()
+    return bool(re.search(r"(?:_2f(?:[._-]|$)|fase[_ -]?2|2[_ -]?fase)", path))
+
+
+def discover_files(session: requests.Session) -> list[ExamFile]:
     response = session.get(INDEX_URL, timeout=(15, 60))
     response.raise_for_status()
     soup = BeautifulSoup(response.content, "html.parser")
@@ -76,9 +84,7 @@ def discover_files(
                 continue
             if not parsed.path.lower().endswith(".pdf"):
                 continue
-            if not include_gabaritos and (
-                "gabarito" in label.casefold() or "gabarito" in href.casefold()
-            ):
+            if is_second_phase_answer_key(label, href):
                 continue
 
             discovered[url] = ExamFile(year=year, label=label, url=url)
@@ -238,11 +244,6 @@ def parse_args() -> argparse.Namespace:
         help=f"Output directory (default: {DEFAULT_OUTPUT}).",
     )
     parser.add_argument(
-        "--include-gabaritos",
-        action="store_true",
-        help="Also download answer-key PDFs.",
-    )
-    parser.add_argument(
         "--refresh",
         action="store_true",
         help="Re-download existing files and replace them only if content changed.",
@@ -261,7 +262,7 @@ def main() -> int:
     args.output.mkdir(parents=True, exist_ok=True)
 
     with build_session() as session:
-        files = discover_files(session, include_gabaritos=args.include_gabaritos)
+        files = discover_files(session)
         print(f"Discovered {len(files)} PDF(s).")
 
         if len(files) < args.min_files:
