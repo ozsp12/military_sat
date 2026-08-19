@@ -1,12 +1,12 @@
 name: Export classification source
 
 on:
-  push:
+  pull_request:
     branches:
-      - agent/classify-ita-multiple-choice
+      - main
     paths-ignore:
       - data/_classification_source/**
-      - data/_classification_source.tsv
+      - data/_classification_mapping/**
   workflow_dispatch:
 
 permissions:
@@ -17,6 +17,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: agent/classify-ita-multiple-choice
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
@@ -48,4 +50,4 @@ jobs:
           git add data/_classification_source/
           git diff --cached --quiet && exit 0
           git commit -m "Split ITA classification source by year"
-          git push
+          git push origin HEAD:agent/classify-ita-multiple-choice
