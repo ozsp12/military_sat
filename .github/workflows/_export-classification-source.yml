@@ -1,4 +1,4 @@
-name: Export classification source
+name: Classify ITA multiple-choice questions
 
 on:
   pull_request:
@@ -6,15 +6,18 @@ on:
       - main
     paths-ignore:
       - data/_classification_source/**
-      - data/_classification_mapping/**
+      - data/_classification_mapping.tsv
+      - data/ita_multiple_choice_classified.xlsx
   workflow_dispatch:
 
 permissions:
   contents: write
+  models: read
 
 jobs:
-  export:
+  classify:
     runs-on: ubuntu-latest
+    timeout-minutes: 120
     steps:
       - uses: actions/checkout@v4
         with:
@@ -22,32 +25,302 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - run: python -m pip install pandas pyarrow
-      - name: Export one row per question by year
+      - run: python -m pip install pandas pyarrow XlsxWriter requests
+
+      - name: Classify all questions and build Excel
+        env:
+          GH_MODELS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           python - <<'PY'
-          import pandas as pd
+          from __future__ import annotations
+
+          import json
+          import math
+          import os
+          import re
+          import time
+          import zipfile
           from pathlib import Path
 
-          df = pd.read_parquet('data/ita_multiple_choice.parquet')
-          cols = ['question_id','year','exam_phase','subject','question_number','question_text']
-          q = df[cols].drop_duplicates('question_id').copy()
-          alts = (df.sort_values(['question_id','alternative'])
-                    .groupby('question_id')
-                    .apply(lambda g: ' || '.join(f"{a}: {t}" for a, t in zip(g['alternative'], g['alternative_text'])), include_groups=False)
-                    .rename('alternatives'))
-          q = q.merge(alts, on='question_id', how='left').sort_values(['year','exam_phase','subject','question_number'])
-          out = Path('data/_classification_source')
-          out.mkdir(parents=True, exist_ok=True)
-          for year, part in q.groupby('year', sort=True):
-              part.to_csv(out / f'{int(year)}.tsv', sep='\t', index=False, lineterminator='\n')
-          print(f'exported {len(q)} questions into {q.year.nunique()} yearly files')
+          import pandas as pd
+          import requests
+
+          MODEL = "openai/gpt-4.1"
+          API = "https://models.github.ai/inference/chat/completions"
+          VERSION = "1.0"
+          BATCH_SIZE = 40
+
+          taxonomy = {
+              "fisica": {
+                  "mecanica": ["geral", "cinematica", "dinamica", "equilibrio_e_estatica", "trabalho_e_energia", "impulso_e_momento", "colisoes", "rotacao", "gravitacao", "movimento_circular"],
+                  "fluidos": ["geral", "hidrostatica", "hidrodinamica"],
+                  "termodinamica": ["geral", "calorimetria", "dilatacao", "gases", "leis_da_termodinamica", "maquinas_termicas", "mudancas_de_fase"],
+                  "ondas": ["geral", "movimento_harmonico_simples", "ondas_mecanicas", "acustica", "efeito_doppler"],
+                  "optica": ["geral", "optica_geometrica", "reflexao", "refracao", "lentes_e_espelhos", "interferencia", "difracao", "polarizacao"],
+                  "eletrostatica": ["geral", "carga_campo_potencial", "capacitores"],
+                  "circuitos_eletricos": ["geral", "corrente_e_resistencia", "circuitos_cc", "circuitos_ca", "potencia_eletrica"],
+                  "eletromagnetismo": ["geral", "campo_magnetico", "forca_magnetica", "inducao_eletromagnetica", "torque_magnetico", "ondas_eletromagneticas"],
+                  "fisica_moderna": ["geral", "relatividade", "quantica", "efeito_fotoeletrico", "fisica_atomica", "fisica_nuclear", "fisica_de_particulas"],
+                  "eletronica": ["geral", "semicondutores", "transistores", "amplificadores"]
+              },
+              "matematica": {
+                  "algebra": ["geral", "equacoes_e_inequacoes", "expressoes_algebricas", "valor_absoluto"],
+                  "funcoes": ["geral", "funcoes_reais", "composicao_e_inversa", "graficos", "equacoes_funcionais"],
+                  "geometria_plana": ["geral", "triangulos", "circulos", "poligonos", "areas", "geometria_euclidiana"],
+                  "geometria_espacial": ["geral", "solidos", "areas_e_volumes", "posicoes_relativas"],
+                  "geometria_analitica": ["geral", "retas", "circunferencia", "conicas", "vetores"],
+                  "trigonometria": ["geral", "identidades_trigonometricas", "equacoes_trigonometricas"],
+                  "combinatoria": ["geral", "principios_de_contagem", "binomio_de_newton"],
+                  "probabilidade": ["geral", "probabilidade_discreta", "probabilidade_condicional"],
+                  "sequencias_e_progressoes": ["geral", "sequencias", "progressao_aritmetica", "progressao_geometrica", "recorrencias"],
+                  "numeros_complexos": ["geral", "forma_algebrica", "forma_polar", "raizes_complexas"],
+                  "polinomios": ["geral", "raizes_de_polinomios", "coeficientes", "divisibilidade_de_polinomios"],
+                  "matrizes_e_sistemas": ["geral", "matrizes", "determinantes", "sistemas_lineares"],
+                  "logaritmos_e_exponenciais": ["geral", "logaritmos", "exponenciais"],
+                  "conjuntos": ["geral", "operacoes_com_conjuntos", "relacoes"],
+                  "teoria_dos_numeros": ["geral", "divisibilidade", "congruencias", "numeros_inteiros"]
+              },
+              "quimica": {
+                  "estrutura_atomica": ["geral", "modelos_atomicos", "numeros_quanticos", "espectros_atomicos"],
+                  "propriedades_periodicas": ["geral", "tabela_periodica", "tendencias_periodicas"],
+                  "ligacoes_e_estrutura_molecular": ["geral", "ligacoes_quimicas", "geometria_molecular", "forcas_intermoleculares"],
+                  "estequiometria": ["geral", "mol_e_massas", "formulas_quimicas", "balanceamento", "reagente_limitante"],
+                  "solucoes": ["geral", "concentracao", "solubilidade", "propriedades_coligativas"],
+                  "gases": ["geral", "equacao_de_estado", "misturas_gasosas"],
+                  "termoquimica": ["geral", "entalpia", "lei_de_hess", "energia_de_ligacao"],
+                  "cinetica_quimica": ["geral", "velocidade_de_reacao", "energia_de_ativacao", "catalise"],
+                  "equilibrio_quimico": ["geral", "constante_de_equilibrio", "principio_de_le_chatelier", "equilibrio_de_solubilidade"],
+                  "acidos_e_bases": ["geral", "ph_e_poh", "tampoes", "hidrolise", "titulacao"],
+                  "eletroquimica": ["geral", "pilhas", "eletrolise", "potenciais_eletroquimicos"],
+                  "quimica_inorganica": ["geral", "funcoes_inorganicas", "reacoes_inorganicas", "quimica_de_coordenacao"],
+                  "quimica_organica": ["geral", "funcoes_organicas", "reacoes_organicas", "isomeria", "polimeros"],
+                  "quimica_nuclear": ["geral", "radioatividade", "reacoes_nucleares"]
+              },
+              "portugues": {
+                  "interpretacao_textual": ["geral", "compreensao", "inferencia", "coesao_e_coerencia"],
+                  "gramatica": ["geral", "morfologia", "sintaxe", "concordancia", "regencia", "pontuacao", "ortografia"],
+                  "semantica": ["geral", "significacao", "ambiguidade", "relacoes_semanticas"],
+                  "literatura": ["geral", "escolas_literarias", "analise_literaria", "autores_e_obras"],
+                  "figuras_de_linguagem": ["geral", "figuras_semanticas", "figuras_sintaticas"],
+                  "variacao_linguistica": ["geral", "registro", "variedades_linguisticas"],
+                  "generos_textuais": ["geral", "tipologia_textual", "generos_discursivos"]
+              },
+              "ingles": {
+                  "reading_comprehension": ["geral", "main_idea", "detail", "inference"],
+                  "vocabulary": ["geral", "meaning_in_context", "synonyms_and_antonyms"],
+                  "grammar": ["geral", "verb_tenses", "modals", "conditionals", "articles_and_determiners", "prepositions", "syntax"],
+                  "reference_and_cohesion": ["geral", "pronoun_reference", "connectors", "cohesive_devices"],
+                  "inference": ["geral", "implicit_meaning", "author_intent"],
+                  "text_structure": ["geral", "organization", "rhetorical_function"]
+              }
+          }
+
+          allowed_skills = {
+              "interpretacao_de_texto", "interpretacao_de_graficos", "interpretacao_de_tabelas",
+              "interpretacao_de_figuras", "modelagem_matematica", "modelagem_fisica",
+              "raciocinio_algebrico", "raciocinio_geometrico", "calculo_numerico",
+              "analise_dimensional", "argumentacao_logica", "leitura_em_ingles",
+              "analise_linguistica", "aplicacao_de_formulas", "resolucao_de_problemas"
+          }
+
+          token = os.environ["GH_MODELS_TOKEN"]
+          headers = {
+              "Accept": "application/vnd.github+json",
+              "Authorization": f"Bearer {token}",
+              "X-GitHub-Api-Version": "2026-03-10",
+              "Content-Type": "application/json",
+          }
+
+          df = pd.read_parquet("data/ita_multiple_choice.parquet")
+          images = pd.read_parquet("data/ita_multiple_choice_images.parquet")
+          qcols = ["question_id", "year", "exam_phase", "subject", "question_number", "question_text", "has_image", "needs_review"]
+          q = df[qcols].drop_duplicates("question_id").copy()
+          alts = (
+              df.sort_values(["question_id", "alternative"])
+                .groupby("question_id", sort=False)
+                .apply(lambda g: " || ".join(f"{a}: {t}" for a, t in zip(g["alternative"], g["alternative_text"])), include_groups=False)
+                .rename("alternatives")
+          )
+          q = q.merge(alts, on="question_id", how="left")
+          q = q.sort_values(["subject", "year", "exam_phase", "question_number"]).reset_index(drop=True)
+
+          system = """Você classifica questões do vestibular ITA em uma taxonomia educacional fechada. Não resolva a questão. Identifique o conteúdo dominante necessário para resolvê-la. topic e subtopic DEVEM ser escolhidos exatamente da taxonomia fornecida. concepts deve conter de 1 a 5 conceitos técnicos em snake_case. skills deve conter de 1 a 3 valores da lista permitida. confidence deve estar entre 0 e 1 e representar sua confiança na classificação temática, não na resposta da questão. Marque needs_topic_review=true quando o texto estiver corrompido, faltar informação essencial da figura ou houver ambiguidade real entre tópicos. Preserve exatamente cada question_id e devolva uma classificação para cada questão, na mesma ordem. Responda somente JSON válido no formato solicitado."""
+
+          def classify_batch(part: pd.DataFrame, subject: str) -> list[dict]:
+              questions = []
+              for row in part.itertuples(index=False):
+                  questions.append({
+                      "question_id": row.question_id,
+                      "question_text": str(row.question_text),
+                      "alternatives": str(row.alternatives),
+                      "has_image": bool(row.has_image),
+                      "extraction_needs_review": bool(row.needs_review),
+                  })
+              prompt = {
+                  "subject": subject,
+                  "taxonomy": taxonomy[subject],
+                  "allowed_skills": sorted(allowed_skills),
+                  "questions": questions,
+                  "output_format": {
+                      "classifications": [{
+                          "question_id": "string",
+                          "topic": "string",
+                          "subtopic": "string",
+                          "concepts": ["snake_case"],
+                          "skills": ["allowed_skill"],
+                          "classification_confidence": 0.0,
+                          "needs_topic_review": False
+                      }]
+                  }
+              }
+              body = {
+                  "model": MODEL,
+                  "messages": [
+                      {"role": "system", "content": system},
+                      {"role": "user", "content": json.dumps(prompt, ensure_ascii=False)},
+                  ],
+                  "temperature": 0.1,
+                  "max_tokens": 12000,
+                  "response_format": {"type": "json_object"},
+              }
+              last_error = None
+              for attempt in range(8):
+                  try:
+                      r = requests.post(API, headers=headers, json=body, timeout=180)
+                      if r.status_code == 429:
+                          wait = min(90, int(r.headers.get("Retry-After", 10)) + attempt * 5)
+                          print(f"rate limited; waiting {wait}s")
+                          time.sleep(wait)
+                          continue
+                      r.raise_for_status()
+                      content = r.json()["choices"][0]["message"]["content"]
+                      content = re.sub(r"^```(?:json)?\s*|\s*```$", "", content.strip(), flags=re.I)
+                      parsed = json.loads(content)
+                      items = parsed.get("classifications", [])
+                      expected = questions
+                      if len(items) != len(expected):
+                          raise ValueError(f"expected {len(expected)} classifications, got {len(items)}")
+                      expected_ids = [x["question_id"] for x in expected]
+                      got_ids = [x.get("question_id") for x in items]
+                      if got_ids != expected_ids:
+                          raise ValueError("question_id/order mismatch")
+                      return items
+                  except Exception as exc:
+                      last_error = exc
+                      wait = min(60, 3 * (attempt + 1))
+                      print(f"classification retry {attempt + 1}: {exc}; waiting {wait}s")
+                      time.sleep(wait)
+              raise RuntimeError(f"classification failed after retries: {last_error}")
+
+          results = []
+          for subject, sq in q.groupby("subject", sort=True):
+              if subject not in taxonomy:
+                  raise ValueError(f"No taxonomy for subject {subject}")
+              sq = sq.reset_index(drop=True)
+              total_batches = math.ceil(len(sq) / BATCH_SIZE)
+              for batch_no, start in enumerate(range(0, len(sq), BATCH_SIZE), 1):
+                  part = sq.iloc[start:start + BATCH_SIZE]
+                  print(f"classifying {subject}: batch {batch_no}/{total_batches}, n={len(part)}")
+                  items = classify_batch(part, subject)
+                  for item, (_, source) in zip(items, part.iterrows()):
+                      topic = str(item.get("topic", ""))
+                      subtopic = str(item.get("subtopic", ""))
+                      if topic not in taxonomy[subject]:
+                          raise ValueError(f"Invalid topic {topic!r} for {subject}: {source.question_id}")
+                      if subtopic not in taxonomy[subject][topic]:
+                          raise ValueError(f"Invalid subtopic {subtopic!r} for {subject}/{topic}: {source.question_id}")
+                      concepts = [str(x).strip().lower() for x in item.get("concepts", []) if str(x).strip()]
+                      concepts = [re.sub(r"[^a-z0-9_]+", "_", x).strip("_") for x in concepts]
+                      concepts = [x for x in concepts if x][:5] or [subtopic]
+                      skills = [str(x) for x in item.get("skills", []) if str(x) in allowed_skills][:3]
+                      if not skills:
+                          skills = ["resolucao_de_problemas"]
+                      confidence = float(item.get("classification_confidence", 0.5))
+                      confidence = max(0.0, min(1.0, confidence))
+                      review = bool(item.get("needs_topic_review", False))
+                      if bool(source.needs_review) and confidence > 0.85:
+                          confidence = 0.85
+                      if confidence < 0.75:
+                          review = True
+                      results.append({
+                          "question_id": source.question_id,
+                          "topic": topic,
+                          "subtopic": subtopic,
+                          "concepts": "; ".join(dict.fromkeys(concepts)),
+                          "skills": "; ".join(dict.fromkeys(skills)),
+                          "classification_confidence": round(confidence, 2),
+                          "needs_topic_review": review,
+                          "taxonomy_version": VERSION,
+                      })
+                  time.sleep(1)
+
+          mapping = pd.DataFrame(results)
+          if len(mapping) != len(q):
+              raise SystemExit(f"Expected {len(q)} classifications, found {len(mapping)}")
+          if mapping["question_id"].duplicated().any():
+              raise SystemExit("Duplicate question_id in classification mapping")
+          if set(mapping["question_id"]) != set(q["question_id"]):
+              raise SystemExit("Classification coverage does not match source questions")
+          mapping.to_csv("data/_classification_mapping.tsv", sep="\t", index=False, lineterminator="\n")
+
+          classified = df.merge(mapping, on="question_id", how="left", validate="many_to_one")
+          if classified["topic"].isna().any():
+              raise SystemExit("Unclassified alternative rows found")
+          classified = classified.sort_values(["year", "exam_phase", "subject", "question_number", "alternative"])
+
+          out = Path("data/ita_multiple_choice_classified.xlsx")
+          with pd.ExcelWriter(out, engine="xlsxwriter") as writer:
+              classified.to_excel(writer, sheet_name="questions", index=False)
+              images.to_excel(writer, sheet_name="images", index=False)
+
+              wb = writer.book
+              header = wb.add_format({"bold": True, "text_wrap": True, "valign": "top", "border": 1})
+              wrap = wb.add_format({"text_wrap": True, "valign": "top"})
+              normal = wb.add_format({"valign": "top"})
+              confidence_fmt = wb.add_format({"num_format": "0.00", "valign": "top"})
+
+              for sheet_name, frame in (("questions", classified), ("images", images)):
+                  ws = writer.sheets[sheet_name]
+                  ws.freeze_panes(1, 0)
+                  ws.autofilter(0, 0, len(frame), max(0, len(frame.columns) - 1))
+                  ws.set_row(0, 30, header)
+                  for col_no, col in enumerate(frame.columns):
+                      if col in {"question_text", "alternative_text"}:
+                          width, fmt = 55, wrap
+                      elif col in {"concepts", "skills"}:
+                          width, fmt = 36, wrap
+                      elif col in {"source_pdf", "image_path"}:
+                          width, fmt = 42, wrap
+                      elif col in {"alternative_id", "question_id", "image_id"}:
+                          width, fmt = 30, normal
+                      elif col == "classification_confidence":
+                          width, fmt = 24, confidence_fmt
+                      else:
+                          width, fmt = min(24, max(12, len(str(col)) + 2)), normal
+                      ws.set_column(col_no, col_no, width, fmt)
+
+          if len(classified) != 8080:
+              raise SystemExit(f"Expected 8080 alternative rows, found {len(classified)}")
+          if classified["question_id"].nunique() != 1616:
+              raise SystemExit(f"Expected 1616 questions, found {classified['question_id'].nunique()}")
+          if not zipfile.is_zipfile(out):
+              raise SystemExit("Generated XLSX is invalid")
+          if classified.groupby("question_id")["topic"].nunique().max() != 1:
+              raise SystemExit("A question has inconsistent topic across alternatives")
+          if classified.groupby("question_id")["subtopic"].nunique().max() != 1:
+              raise SystemExit("A question has inconsistent subtopic across alternatives")
+
+          print(f"classified questions: {len(mapping)}")
+          print(f"topic review: {int(mapping['needs_topic_review'].sum())}")
+          print(f"mean confidence: {mapping['classification_confidence'].mean():.3f}")
+          print(f"xlsx: {out} ({out.stat().st_size} bytes)")
           PY
-      - name: Commit source
+
+      - name: Commit classified workbook and temporary mapping
         run: |
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git add data/_classification_source/
+          git add data/ita_multiple_choice_classified.xlsx data/_classification_mapping.tsv
           git diff --cached --quiet && exit 0
-          git commit -m "Split ITA classification source by year"
+          git commit -m "Classify ITA multiple-choice questions"
           git push origin HEAD:agent/classify-ita-multiple-choice
