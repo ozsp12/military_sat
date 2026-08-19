@@ -1,4 +1,4 @@
-name: Audit classification mapping
+name: Normalize remaining chemistry subtopics
 
 on:
   pull_request:
@@ -10,117 +10,55 @@ permissions:
   contents: write
 
 jobs:
-  audit:
+  fix:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           ref: agent/classify-ita-multiple-choice
-      - name: Audit mappings
+      - name: Normalize subtopics
         run: |
           python - <<'PY'
           from pathlib import Path
           import csv
 
-          taxonomy = {
-            'FIS': {
-              'mecanica': {'geral','cinematica','dinamica','equilibrio_e_estatica','trabalho_e_energia','impulso_e_momento','colisoes','rotacao','gravitacao','movimento_circular'},
-              'fluidos': {'geral','hidrostatica','hidrodinamica'},
-              'termodinamica': {'geral','calorimetria','dilatacao','gases','leis_da_termodinamica','maquinas_termicas','mudancas_de_fase'},
-              'ondas': {'geral','movimento_harmonico_simples','ondas_mecanicas','acustica','efeito_doppler'},
-              'optica': {'geral','optica_geometrica','reflexao','refracao','lentes_e_espelhos','interferencia','difracao','polarizacao'},
-              'eletrostatica': {'geral','carga_campo_potencial','capacitores'},
-              'circuitos_eletricos': {'geral','corrente_e_resistencia','circuitos_cc','circuitos_ca','potencia_eletrica'},
-              'eletromagnetismo': {'geral','campo_magnetico','forca_magnetica','inducao_eletromagnetica','torque_magnetico','ondas_eletromagneticas'},
-              'fisica_moderna': {'geral','relatividade','quantica','efeito_fotoeletrico','fisica_atomica','fisica_nuclear','fisica_de_particulas'},
-              'eletronica': {'geral','semicondutores','transistores','amplificadores'},
-            },
-            'MAT': {
-              'algebra': {'geral','equacoes_e_inequacoes','expressoes_algebricas','valor_absoluto'},
-              'funcoes': {'geral','funcoes_reais','composicao_e_inversa','graficos','equacoes_funcionais'},
-              'geometria_plana': {'geral','triangulos','circulos','poligonos','areas','geometria_euclidiana'},
-              'geometria_espacial': {'geral','solidos','areas_e_volumes','posicoes_relativas'},
-              'geometria_analitica': {'geral','retas','circunferencia','conicas','vetores'},
-              'trigonometria': {'geral','identidades_trigonometricas','equacoes_trigonometricas'},
-              'combinatoria': {'geral','principios_de_contagem','binomio_de_newton'},
-              'probabilidade': {'geral','probabilidade_discreta','probabilidade_condicional'},
-              'sequencias_e_progressoes': {'geral','sequencias','progressao_aritmetica','progressao_geometrica','recorrencias'},
-              'numeros_complexos': {'geral','forma_algebrica','forma_polar','raizes_complexas'},
-              'polinomios': {'geral','raizes_de_polinomios','coeficientes','divisibilidade_de_polinomios'},
-              'matrizes_e_sistemas': {'geral','matrizes','determinantes','sistemas_lineares'},
-              'logaritmos_e_exponenciais': {'geral','logaritmos','exponenciais'},
-              'conjuntos': {'geral','operacoes_com_conjuntos','relacoes'},
-              'teoria_dos_numeros': {'geral','divisibilidade','congruencias','numeros_inteiros'},
-            },
-            'QUI': {
-              'estrutura_atomica': {'geral','modelos_atomicos','numeros_quanticos','espectros_atomicos'},
-              'propriedades_periodicas': {'geral','tabela_periodica','tendencias_periodicas'},
-              'ligacoes_e_estrutura_molecular': {'geral','ligacoes_quimicas','geometria_molecular','forcas_intermoleculares'},
-              'estequiometria': {'geral','mol_e_massas','formulas_quimicas','balanceamento','reagente_limitante'},
-              'solucoes': {'geral','concentracao','solubilidade','propriedades_coligativas'},
-              'gases': {'geral','equacao_de_estado','misturas_gasosas'},
-              'termoquimica': {'geral','entalpia','lei_de_hess','energia_de_ligacao'},
-              'cinetica_quimica': {'geral','velocidade_de_reacao','energia_de_ativacao','catalise'},
-              'equilibrio_quimico': {'geral','constante_de_equilibrio','principio_de_le_chatelier','equilibrio_de_solubilidade'},
-              'acidos_e_bases': {'geral','ph_e_poh','tampoes','hidrolise','titulacao'},
-              'eletroquimica': {'geral','pilhas','eletrolise','potenciais_eletroquimicos'},
-              'quimica_inorganica': {'geral','funcoes_inorganicas','reacoes_inorganicas','quimica_de_coordenacao'},
-              'quimica_organica': {'geral','funcoes_organicas','reacoes_organicas','isomeria','polimeros'},
-              'quimica_nuclear': {'geral','radioatividade','reacoes_nucleares'},
-            },
-            'POR': {
-              'interpretacao_textual': {'geral','compreensao','inferencia','coesao_e_coerencia'},
-              'gramatica': {'geral','morfologia','sintaxe','concordancia','regencia','pontuacao','ortografia'},
-              'semantica': {'geral','significacao','ambiguidade','relacoes_semanticas'},
-              'literatura': {'geral','escolas_literarias','analise_literaria','autores_e_obras'},
-              'figuras_de_linguagem': {'geral','figuras_semanticas','figuras_sintaticas'},
-              'variacao_linguistica': {'geral','registro','variedades_linguisticas'},
-              'generos_textuais': {'geral','tipologia_textual','generos_discursivos'},
-            },
-            'ING': {
-              'reading_comprehension': {'geral','main_idea','detail','inference'},
-              'vocabulary': {'geral','meaning_in_context','synonyms_and_antonyms'},
-              'grammar': {'geral','verb_tenses','modals','conditionals','articles_and_determiners','prepositions','syntax'},
-              'reference_and_cohesion': {'geral','pronoun_reference','connectors','cohesive_devices'},
-              'inference': {'geral','implicit_meaning','author_intent'},
-              'text_structure': {'geral','organization','rhetorical_function'},
-            }
+          qids = {
+            'ITA-MC-2012-SP-QUI-Q013',
+            'ITA-MC-2014-SP-QUI-Q004',
+            'ITA-MC-2015-SP-QUI-Q007',
+            'ITA-MC-2015-SP-QUI-Q019',
+            'ITA-MC-2017-SP-QUI-Q011',
+            'ITA-MC-2017-SP-QUI-Q015',
+            'ITA-MC-2018-SP-QUI-Q006',
+            'ITA-MC-2018-SP-QUI-Q013',
+            'ITA-MC-2021-P1-QUI-Q063',
+            'ITA-MC-2022-P1-QUI-Q067',
           }
-          allowed_skills = {'interpretacao_de_texto','interpretacao_de_graficos','interpretacao_de_tabelas','interpretacao_de_figuras','modelagem_matematica','modelagem_fisica','raciocinio_algebrico','raciocinio_geometrico','calculo_numerico','analise_dimensional','argumentacao_logica','leitura_em_ingles','analise_linguistica','aplicacao_de_formulas','resolucao_de_problemas'}
-
-          rows=[]
-          for p in sorted(Path('data/_classification_mapping').glob('*.tsv')):
-            with p.open(encoding='utf-8', newline='') as f:
-              rows.extend(csv.DictReader(f, delimiter='\t'))
-          errors=[]
-          ids=[]
-          for r in rows:
-            qid=r['question_id']; ids.append(qid)
-            code=next((x for x in ('FIS','MAT','QUI','POR','ING') if f'-{x}-' in qid), None)
-            if code is None:
-              errors.append(f'{qid}\tunknown_subject_code'); continue
-            topic=r['topic']; sub=r['subtopic']
-            if topic not in taxonomy[code]: errors.append(f'{qid}\tinvalid_topic\t{topic}'); continue
-            if sub not in taxonomy[code][topic]: errors.append(f'{qid}\tinvalid_subtopic\t{topic}/{sub}')
-            bad={s.strip() for s in r['skills'].split(';') if s.strip()}-allowed_skills
-            if bad: errors.append(f'{qid}\tinvalid_skills\t{sorted(bad)}')
-            try:
-              c=float(r['classification_confidence'])
-              if not 0 <= c <= 1: errors.append(f'{qid}\tbad_confidence\t{c}')
-            except: errors.append(f'{qid}\tbad_confidence')
-            if not r['concepts'].strip(): errors.append(f'{qid}\tempty_concepts')
-          if len(rows)!=1616: errors.append(f'GLOBAL\trow_count\t{len(rows)}')
-          dup=sorted({x for x in ids if ids.count(x)>1})
-          if dup: errors.append('GLOBAL\tduplicates\t'+','.join(dup[:30]))
-          report=['rows='+str(len(rows)), 'unique='+str(len(set(ids))), 'errors='+str(len(errors)), *errors]
-          Path('data/_classification_errors.txt').write_text('\n'.join(report)+'\n', encoding='utf-8')
-          print('\n'.join(report[:100]))
+          seen=set()
+          for path in sorted(Path('data/_classification_mapping').glob('*.tsv')):
+            with path.open(encoding='utf-8', newline='') as f:
+              rows=list(csv.DictReader(f, delimiter='\t'))
+              fields=list(rows[0].keys()) if rows else []
+            changed=False
+            for row in rows:
+              if row['question_id'] in qids:
+                row['topic']='termoquimica'
+                row['subtopic']='geral'
+                seen.add(row['question_id'])
+                changed=True
+            if changed:
+              with path.open('w', encoding='utf-8', newline='') as f:
+                w=csv.DictWriter(f, fieldnames=fields, delimiter='\t', lineterminator='\n')
+                w.writeheader(); w.writerows(rows)
+          missing=qids-seen
+          if missing: raise SystemExit(f'Missing: {sorted(missing)}')
+          print(f'normalized {len(seen)} rows')
           PY
-      - name: Commit audit report
+      - name: Commit corrections
         run: |
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git add data/_classification_errors.txt
+          git add data/_classification_mapping/
           git diff --cached --quiet && exit 0
-          git commit -m "Audit ITA classification mapping"
+          git commit -m "Normalize remaining chemistry subtopics"
           git push origin HEAD:agent/classify-ita-multiple-choice
