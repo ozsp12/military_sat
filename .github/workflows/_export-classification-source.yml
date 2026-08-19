@@ -1,0 +1,46 @@
+name: Export classification source
+
+on:
+  push:
+    branches:
+      - agent/classify-ita-multiple-choice
+    paths-ignore:
+      - data/_classification_source.tsv
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install pandas pyarrow
+      - name: Export one row per question
+        run: |
+          python - <<'PY'
+          import pandas as pd
+
+          df = pd.read_parquet('data/ita_multiple_choice.parquet')
+          cols = ['question_id','year','exam_phase','subject','question_number','question_text']
+          q = df[cols].drop_duplicates('question_id').copy()
+          alts = (df.sort_values(['question_id','alternative'])
+                    .groupby('question_id')
+                    .apply(lambda g: ' || '.join(f"{a}: {t}" for a, t in zip(g['alternative'], g['alternative_text'])), include_groups=False)
+                    .rename('alternatives'))
+          q = q.merge(alts, on='question_id', how='left').sort_values(['year','exam_phase','subject','question_number'])
+          q.to_csv('data/_classification_source.tsv', sep='\t', index=False, lineterminator='\n')
+          print(f'exported {len(q)} questions')
+          PY
+      - name: Commit source
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add data/_classification_source.tsv
+          git diff --cached --quiet && exit 0
+          git commit -m "Export ITA classification source"
+          git push
