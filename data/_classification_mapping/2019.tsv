@@ -1,0 +1,61 @@
+question_id	topic	subtopic	concepts	skills	classification_confidence	needs_topic_review	taxonomy_version
+ITA-MC-2019-P1-FIS-Q001	optica	polarizacao	polarizacao_da_luz; ondas_eletromagneticas; reflexao	argumentacao_logica; resolucao_de_problemas	0.92	false	1.0
+ITA-MC-2019-P1-FIS-Q002	mecanica	movimento_circular	movimento_circular; mola; tensao	modelagem_fisica; interpretacao_de_figuras	0.95	false	1.0
+ITA-MC-2019-P1-FIS-Q003	mecanica	gravitacao	campo_gravitacional_interno; tunel_planetario; oscilacao	modelagem_fisica; aplicacao_de_formulas	0.99	false	1.0
+ITA-MC-2019-P1-FIS-Q004	optica	lentes_e_espelhos	espelho_concavo; aumento_linear; distancia_focal	modelagem_fisica; calculo_numerico	0.99	false	1.0
+ITA-MC-2019-P1-FIS-Q005	circuitos_eletricos	circuitos_cc	bateria; resistencia_interna; carregamento	modelagem_fisica; calculo_numerico	0.99	false	1.0
+ITA-MC-2019-P1-FIS-Q006	mecanica	equilibrio_e_estatica	barra; equilibrio; torque	modelagem_fisica; interpretacao_de_figuras	0.99	false	1.0
+ITA-MC-2019-P1-FIS-Q007	mecanica	rotacao	efeito_magnus; rotacao; trajetoria	argumentacao_logica; interpretacao_de_figuras	0.88	false	1.0
+ITA-MC-2019-P1-FIS-Q008	termodinamica	gases	efusao; distribuicao_de_maxwell; mistura_gasosa	argumentacao_logica; modelagem_fisica	0.95	false	1.0
+ITA-MC-2019-P1-FIS-Q009	eletrostatica	carga_campo_potencial	potencial_eletrico; campo_eletrico; gradiente_de_potencial	interpretacao_de_figuras; modelagem_fisica	0.99	false	1.0
+ITA-MC-2019-P1-FIS-Q010	eletromagnetismo	forca_magnetica	movimento_helicoidal; particula_carregada; periodo_ciclotron	modelagem_fisica; aplicacao_de_formulas	0.99	false	1.0
+ITA-MC-2019-P1-FIS-Q011	fisica_moderna	efeito_fotoeletrico	radiacao_termica; fotoemissao; eletrodo	argumentacao_logica; interpretacao_de_figuras	0.85	false	1.0
+ITA-MC-2019-P1-FIS-Q012	eletromagnetismo	inducao_eletromagnetica	solenoide; espira; fluxo_magnetico	modelagem_fisica; interpretacao_de_figuras	0.99	false	1.0
+ITA-MC-2019-P1-ING-Q025	reading_comprehension	detail	food_consumption; statistics; factual_detail	leitura_em_ingles; interpretacao_de_texto	0.99	false	1.0
+ITA-MC-2019-P1-ING-Q026	reading_comprehension	detail	calorie_consumption; historical_comparison	leitura_em_ingles; interpretacao_de_texto	0.99	false	1.0
+ITA-MC-2019-P1-ING-Q027	reading_comprehension	detail	obesity; legislators; research_data	leitura_em_ingles; interpretacao_de_texto	0.99	false	1.0
+ITA-MC-2019-P1-ING-Q028	inference	author_intent	obesity; responsibility; food_industry	leitura_em_ingles; interpretacao_de_texto	0.99	false	1.0
+ITA-MC-2019-P1-ING-Q029	reference_and_cohesion	connectors	as; semantic_equivalence; connector	leitura_em_ingles; analise_linguistica	0.99	false	1.0
+ITA-MC-2019-P1-ING-Q030	inference	implicit_meaning	cartoon; journalism; fact_checking	leitura_em_ingles; interpretacao_de_figuras	0.99	false	1.0
+ITA-MC-2019-P1-ING-Q031	inference	implicit_meaning	boss_reaction; cartoon; journalism	leitura_em_ingles; interpretacao_de_figuras	0.99	false	1.0
+ITA-MC-2019-P1-ING-Q032	grammar	syntax	word_classes; nouns; verbs	leitura_em_ingles; analise_linguistica	0.99	false	1.0
+ITA-MC-2019-P1-ING-Q033	reading_comprehension	detail	artificial_intelligence; regulation; factual_detail	leitura_em_ingles; interpretacao_de_texto	0.99	false	1.0
+ITA-MC-2019-P1-ING-Q034	reading_comprehension	inference	software_defined_regulation; ai; policy	leitura_em_ingles; interpretacao_de_texto	0.99	false	1.0
+ITA-MC-2019-P1-ING-Q035	vocabulary	meaning_in_context	lexical_substitution; contextual_meaning	leitura_em_ingles; analise_linguistica	0.99	false	1.0
+ITA-MC-2019-P1-ING-Q036	grammar	syntax	so; purpose; intensifier; discourse_reference	leitura_em_ingles; analise_linguistica	0.95	false	1.0
+ITA-MC-2019-P1-MAT-Q037	geometria_plana	triangulos	retangulo; pontos_medios; tangente_de_angulo	raciocinio_geometrico; modelagem_matematica	0.99	false	1.0
+ITA-MC-2019-P1-MAT-Q038	polinomios	raizes_de_polinomios	raizes_em_progressao_aritmetica; vieta; soma_de_raizes	raciocinio_algebrico; resolucao_de_problemas	0.99	false	1.0
+ITA-MC-2019-P1-MAT-Q039	geometria_analitica	circunferencia	retas_tangentes; circunferencia; angulo_entre_retas	modelagem_matematica; raciocinio_geometrico	0.99	false	1.0
+ITA-MC-2019-P1-MAT-Q040	geometria_espacial	areas_e_volumes	cone; planificacao; setor_circular	modelagem_matematica; raciocinio_geometrico	0.99	false	1.0
+ITA-MC-2019-P1-MAT-Q041	matrizes_e_sistemas	sistemas_lineares	sistema_impossivel; parametros; lugar_geometrico	raciocinio_algebrico; modelagem_matematica	0.99	false	1.0
+ITA-MC-2019-P1-MAT-Q042	numeros_complexos	raizes_complexas	raizes_quartas; raizes_cubicas; plano_complexo	raciocinio_algebrico; raciocinio_geometrico	0.99	false	1.0
+ITA-MC-2019-P1-MAT-Q043	algebra	geral	desigualdades; equacao_cubica; progressao_aritmetica	argumentacao_logica; raciocinio_algebrico	0.75	false	1.0
+ITA-MC-2019-P1-MAT-Q044	probabilidade	probabilidade_discreta	moedas_numeradas; soma_aleatoria; combinatoria	modelagem_matematica; calculo_numerico	0.99	false	1.0
+ITA-MC-2019-P1-MAT-Q045	matrizes_e_sistemas	matrizes	matriz_inversa; entradas_inteiras; propriedades_matriciais	argumentacao_logica; raciocinio_algebrico	0.99	false	1.0
+ITA-MC-2019-P1-MAT-Q046	trigonometria	identidades_trigonometricas	soma_de_cossenos; periodicidade; serie_finita	raciocinio_algebrico; aplicacao_de_formulas	0.95	false	1.0
+ITA-MC-2019-P1-MAT-Q047	geometria_espacial	areas_e_volumes	tronco_de_cone; esfera; cilindro; volumes	raciocinio_geometrico; calculo_numerico	0.99	false	1.0
+ITA-MC-2019-P1-MAT-Q048	algebra	geral	relacoes_entre_raizes; divisibilidade; radicais	argumentacao_logica; raciocinio_algebrico	0.75	false	1.0
+ITA-MC-2019-P1-POR-Q013	interpretacao_textual	compreensao	grafite; pichacao; arte_urbana	interpretacao_de_texto; argumentacao_logica	0.99	false	1.0
+ITA-MC-2019-P1-POR-Q014	interpretacao_textual	compreensao	grafite; pichacao; reconhecimento_social	interpretacao_de_texto; argumentacao_logica	0.99	false	1.0
+ITA-MC-2019-P1-POR-Q015	gramatica	sintaxe	condicao; subordinacao; conector	analise_linguistica; argumentacao_logica	0.99	false	1.0
+ITA-MC-2019-P1-POR-Q016	gramatica	sintaxe	causa; relacao_semantica; conector	analise_linguistica; argumentacao_logica	0.99	false	1.0
+ITA-MC-2019-P1-POR-Q017	variacao_linguistica	registro	coloquialidade; norma_padrao; cronica	analise_linguistica; interpretacao_de_texto	0.99	false	1.0
+ITA-MC-2019-P1-POR-Q018	gramatica	sintaxe	pronome_relativo; que; referencia	analise_linguistica; argumentacao_logica	0.99	false	1.0
+ITA-MC-2019-P1-POR-Q019	interpretacao_textual	coesao_e_coerencia	relacao_entre_textos; grafite; pichacao	interpretacao_de_texto; argumentacao_logica	0.99	false	1.0
+ITA-MC-2019-P1-POR-Q020	interpretacao_textual	inferencia	charge; critica_social; pichacao	interpretacao_de_figuras; interpretacao_de_texto	0.99	false	1.0
+ITA-MC-2019-P1-POR-Q021	literatura	escolas_literarias	senhora; romantismo; jose_de_alencar	interpretacao_de_texto; argumentacao_logica	0.99	false	1.0
+ITA-MC-2019-P1-POR-Q022	literatura	autores_e_obras	quincas_borba; adulterio; machado_de_assis	interpretacao_de_texto; argumentacao_logica	0.99	false	1.0
+ITA-MC-2019-P1-POR-Q023	literatura	escolas_literarias	sao_bernardo; geracao_de_30; paulo_honorio	interpretacao_de_texto; argumentacao_logica	0.99	false	1.0
+ITA-MC-2019-P1-POR-Q024	literatura	analise_literaria	cecilia_meireles; epigrama; metafora	interpretacao_de_texto; argumentacao_logica	0.99	false	1.0
+ITA-MC-2019-P1-QUI-Q049	ligacoes_e_estrutura_molecular	forcas_intermoleculares	ponto_de_ebulicao; polaridade; forcas_intermolectares	argumentacao_logica; resolucao_de_problemas	0.99	false	1.0
+ITA-MC-2019-P1-QUI-Q050	quimica_organica	isomeria	aminas; isomeria_estrutural; c4h11n	argumentacao_logica; calculo_numerico	0.99	false	1.0
+ITA-MC-2019-P1-QUI-Q051	termoquimica	geral	retardantes_de_chama; combustao; transferencia_de_calor	argumentacao_logica; resolucao_de_problemas	0.90	false	1.0
+ITA-MC-2019-P1-QUI-Q052	estrutura_atomica	espectros_atomicos	energia_de_foton; filtro_uv; espectro	modelagem_matematica; calculo_numerico	0.95	false	1.0
+ITA-MC-2019-P1-QUI-Q053	eletroquimica	pilhas	aco_galvanizado; corrosao; potenciais_redox	argumentacao_logica; resolucao_de_problemas	0.99	false	1.0
+ITA-MC-2019-P1-QUI-Q054	acidos_e_bases	geral	indicador_acido_base; pka; razao_de_formas	modelagem_matematica; calculo_numerico	0.99	false	1.0
+ITA-MC-2019-P1-QUI-Q055	cinetica_quimica	geral	computacao_quimica; mecanismos_reacionais; sistemas_quimicos	argumentacao_logica; resolucao_de_problemas	0.78	false	1.0
+ITA-MC-2019-P1-QUI-Q056	ligacoes_e_estrutura_molecular	ligacoes_quimicas	configuracao_eletronica; moleculas_do_segundo_periodo; ligacoes_multiplas	argumentacao_logica; resolucao_de_problemas	0.99	false	1.0
+ITA-MC-2019-P1-QUI-Q057	quimica_nuclear	reacoes_nucleares	nuclideos_excitados; bombardeamento; decaimento	argumentacao_logica; resolucao_de_problemas	0.99	false	1.0
+ITA-MC-2019-P1-QUI-Q058	quimica_organica	reacoes_organicas	adicao_a_dienos_conjugados; produto_1_2; produto_1_4	argumentacao_logica; resolucao_de_problemas	0.99	false	1.0
+ITA-MC-2019-P1-QUI-Q059	estrutura_atomica	geral	espectrometria_de_massa; isotopos; abundancia_isotopica	interpretacao_de_graficos; calculo_numerico	0.90	false	1.0
+ITA-MC-2019-P1-QUI-Q060	estequiometria	mol_e_massas	mistura_gasosa; massa_de_carbono; composicao_percentual	modelagem_matematica; calculo_numerico	0.99	false	1.0
