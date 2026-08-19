@@ -1,0 +1,67 @@
+name: Fix classification taxonomy
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - .github/workflows/_fix-classification-taxonomy.yml
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/classify-ita-multiple-choice
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Apply taxonomy corrections
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import csv
+
+          corrections = {
+            'ITA-MC-2009-SP-QUI-Q013': ('termoquimica', 'geral'),
+            'ITA-MC-2011-SP-QUI-Q010': ('termoquimica', 'geral'),
+            'ITA-MC-2016-SP-QUI-Q014': ('estrutura_atomica', 'espectros_atomicos'),
+            'ITA-MC-2020-P1-FIS-Q011': ('ondas', 'ondas_mecanicas'),
+            'ITA-MC-2022-P1-QUI-Q002': ('quimica_organica', 'reacoes_organicas'),
+            'ITA-MC-2025-P1-QUI-Q029': ('eletroquimica', 'geral'),
+            'ITA-MC-2025-P1-QUI-Q030': ('termoquimica', 'geral'),
+            'ITA-MC-2025-P1-QUI-Q034': ('termoquimica', 'geral'),
+            'ITA-MC-2026-P1-QUI-Q027': ('termoquimica', 'geral'),
+          }
+          seen = set()
+          for path in sorted(Path('data/_classification_mapping').glob('*.tsv')):
+            with path.open(encoding='utf-8', newline='') as f:
+              rows = list(csv.DictReader(f, delimiter='\t'))
+              fields = list(rows[0].keys()) if rows else []
+            changed = False
+            for row in rows:
+              qid = row['question_id']
+              if qid in corrections:
+                row['topic'], row['subtopic'] = corrections[qid]
+                seen.add(qid)
+                changed = True
+            if changed:
+              with path.open('w', encoding='utf-8', newline='') as f:
+                w = csv.DictWriter(f, fieldnames=fields, delimiter='\t', lineterminator='\n')
+                w.writeheader(); w.writerows(rows)
+          missing = set(corrections) - seen
+          if missing:
+            raise SystemExit(f'Corrections not found: {sorted(missing)}')
+          print(f'applied {len(seen)} corrections')
+          PY
+      - name: Commit corrections
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add data/_classification_mapping/
+          git diff --cached --quiet && exit 0
+          git commit -m "Normalize classification taxonomy"
+          git push origin HEAD:agent/classify-ita-multiple-choice
