@@ -8,13 +8,14 @@ Official ITA entrance-exam PDFs are mirrored from:
 
 https://www.vestibular.ita.br/provas.htm
 
-The archive contains the exam papers only; answer keys are excluded by default.
+The archive contains the exam papers and the official first-phase answer keys. Second-phase answer keys are excluded.
 
 ```text
 ita_provas/
 ├── manifest.xlsx
 ├── 2026/
 │   ├── 2026_fase1.pdf
+│   ├── gabarito_2026.pdf
 │   ├── matematica_2026_2f.pdf
 │   ├── fisica_2026_2f.pdf
 │   └── ...
@@ -38,18 +39,12 @@ To force verification against the current upstream files:
 python scripts/download_ita_provas.py --refresh --min-files 95
 ```
 
-To include answer keys as well:
-
-```bash
-python scripts/download_ita_provas.py --include-gabaritos
-```
-
 ## ITA datasets
 
 `scripts/build_ita_datasets.py` processes the archived PDFs and separates numbered questions by type rather than by exam phase.
 
 ```text
-data/
+ita_data/
 ├── ita_multiple_choice.parquet
 ├── ita_multiple_choice.xlsx
 ├── ita_multiple_choice_images.parquet
